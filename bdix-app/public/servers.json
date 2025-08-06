@@ -1,0 +1,20 @@
+[
+  {
+    "id": "1",
+    "name": "BDIX FTP 1",
+    "url": "http://ftp.bdix.net",
+    "type": "ftp"
+  },
+  {
+    "id": "2",
+    "name": "BDIX TV 1",
+    "url": "http://tv.bdix.net",
+    "type": "tv"
+  },
+  {
+    "id": "3",
+    "name": "BDIX Movie 1",
+    "url": "http://movie.bdix.net",
+    "type": "movie"
+  }
+]
