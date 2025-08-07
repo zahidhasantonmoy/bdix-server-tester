@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { motion } from "framer-motion";
 
 interface Server {
   id: number;
@@ -9,9 +10,114 @@ interface Server {
 }
 
 interface ServerStatus {
-  status: string;
+  status: "Working" | "Not Working" | "Testing..." | "Error" | "Not Tested";
   loading: boolean;
 }
+
+const ServerCard = ({ server, status, onTest }: {
+  server: Server;
+  status: ServerStatus;
+  onTest: (server: Server) => void;
+}) => {
+  const statusColor = useMemo(() => {
+    switch (status.status) {
+      case "Working":
+        return "text-green-400";
+      case "Not Working":
+        return "text-red-400";
+      case "Testing...":
+        return "text-yellow-400";
+      case "Error":
+        return "text-orange-400";
+      default:
+        return "text-gray-400";
+    }
+  }, [status.status]);
+
+  const statusEmoji = useMemo(() => {
+    switch (status.status) {
+      case "Working":
+        return "✅";
+      case "Not Working":
+        return "❌";
+      case "Testing...":
+        return "⏳";
+      case "Error":
+        return "⚠️";
+      default:
+        return "⚪";
+    }
+  }, [status.status]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-700 hover:border-blue-500 transition-all duration-300 flex flex-col justify-between"
+    >
+      <div>
+        <h3 className="text-xl font-semibold mb-2 text-white">{server.name}</h3>
+        <p className="text-sm text-gray-400 mb-2">Type: {server.type}</p>
+        <p className={`text-md font-medium ${statusColor}`}>
+          Status: {statusEmoji} {status.status}
+        </p>
+      </div>
+      <div className="mt-4 flex flex-col sm:flex-row gap-2">
+        <a
+          href={server.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex-grow text-center px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors duration-300 text-sm transform hover:scale-105"
+        >
+          Open Server
+        </a>
+        <button
+          onClick={() => onTest(server)}
+          disabled={status.loading}
+          className="flex-grow px-4 py-2 rounded-lg bg-gray-700 text-gray-200 font-semibold hover:bg-gray-600 transition-colors duration-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+        >
+          {status.loading ? "Testing..." : "Test"}
+        </button>
+      </div>
+    </motion.div>
+  );
+};
+
+const SpeedTestSection = ({
+  title,
+  speed,
+  loading,
+  onTest,
+  buttonText,
+}: {
+  title: string;
+  speed: number | null;
+  loading: boolean;
+  onTest: () => void;
+  buttonText: string;
+}) => (
+  <div className="p-6 bg-gray-800 rounded-xl shadow-lg border border-gray-700 flex flex-col items-center justify-center">
+    <h3 className="text-2xl font-bold mb-4 text-white">{title}</h3>
+    <button
+      onClick={onTest}
+      disabled={loading}
+      className="w-full px-6 py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+    >
+      {loading ? "Testing..." : buttonText}
+    </button>
+    {speed !== null && (
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="mt-4 text-3xl font-bold text-blue-400"
+      >
+        {speed} <span className="text-xl text-gray-400">Mbps</span>
+      </motion.p>
+    )}
+  </div>
+);
 
 export default function Home() {
   const [servers, setServers] = useState<Server[]>([]);
@@ -22,6 +128,7 @@ export default function Home() {
   const [bdixSpeed, setBdixSpeed] = useState<number | null>(null);
   const [loadingGlobalSpeed, setLoadingGlobalSpeed] = useState(false);
   const [loadingBdixSpeed, setLoadingBdixSpeed] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
 
   useEffect(() => {
     fetch("/servers.json")
@@ -29,7 +136,7 @@ export default function Home() {
       .then((data) => setServers(data));
   }, []);
 
-  const checkServerStatus = async (server: Server) => {
+  const checkServerStatus = useCallback(async (server: Server) => {
     setServerStatuses((prev) => ({ ...prev, [server.id]: { status: "Testing...", loading: true } }));
     try {
       const response = await fetch(`/api/check-server?url=${encodeURIComponent(server.url)}`);
@@ -39,7 +146,7 @@ export default function Home() {
       console.error("Error checking server:", error);
       setServerStatuses((prev) => ({ ...prev, [server.id]: { status: "Error", loading: false } }));
     }
-  };
+  }, []);
 
   const testAllServers = async () => {
     setLoadingAll(true);
@@ -56,19 +163,32 @@ export default function Home() {
     setLoading(true);
     setSpeed(null);
 
-    const fileSize = 10000000; // 10 MB
+    const testFileUrl = type === "global"
+      ? "https://speed.hetzner.de/100MB.bin" // A public 100MB test file
+      : "/api/speed-test?size=10000000"; // Our local 10MB dummy file for BDIX
+
+    const fileSize = type === "global" ? 100 * 1024 * 1024 : 10 * 1024 * 1024; // 100MB for global, 10MB for BDIX
+
     const startTime = new Date().getTime();
 
     try {
-      const response = await fetch(`/api/speed-test?size=${fileSize}`);
+      const response = await fetch(testFileUrl);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      await response.blob(); // Download the file
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error("Failed to get reader");
+
+      let receivedLength = 0;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        receivedLength += value.length;
+      }
 
       const endTime = new Date().getTime();
       const duration = (endTime - startTime) / 1000; // seconds
-      const bitsLoaded = fileSize * 8; // bits
+      const bitsLoaded = receivedLength * 8; // bits
       const speedMbps = (bitsLoaded / duration / 1000000).toFixed(2);
       setSpeed(parseFloat(speedMbps));
     } catch (error) {
@@ -80,10 +200,12 @@ export default function Home() {
   };
 
   const filteredServers = useMemo(() => {
-    return servers.filter((server) =>
-      server.name.toLowerCase().includes(search.toLowerCase())
-    );
-  }, [servers, search]);
+    return servers.filter((server) => {
+      const matchesSearch = server.name.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = selectedCategory === "All" || server.type === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [servers, search, selectedCategory]);
 
   const categorizedServers = useMemo(() => {
     return filteredServers.reduce((acc, server) => {
@@ -95,105 +217,112 @@ export default function Home() {
     }, {} as Record<string, Server[]>);
   }, [filteredServers]);
 
+  const uniqueCategories = useMemo(() => {
+    const categories = new Set(servers.map(s => s.type));
+    return ["All", ...Array.from(categories).sort()];
+  }, [servers]);
+
   return (
-    <div className="font-sans bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
-      <main className="container mx-auto p-4 sm:p-6 lg:p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold">BDIX Server & Speed Tester</h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
-            Test BDIX server reachability and internet speed.
+    <div className="font-sans bg-gray-900 text-gray-100 min-h-screen p-4 sm:p-8">
+      <main className="container mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: -50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
+        >
+          <h1 className="text-5xl font-extrabold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600">
+            BDIX Nexus
+          </h1>
+          <p className="text-xl text-gray-300">
+            Your gateway to BDIX server status and internet speed insights.
           </p>
-        </div>
+        </motion.div>
 
-        <div className="mb-8 flex flex-col sm:flex-row gap-4">
-          <input
-            type="text"
-            placeholder="Search for a server..."
-            className="flex-grow p-4 rounded-lg bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <button
-            onClick={testAllServers}
-            disabled={loadingAll}
-            className="px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loadingAll ? "Testing All..." : "Test All Servers"}
-          </button>
-        </div>
-
-        <div className="mb-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-          <h2 className="text-3xl font-bold mb-4">Internet Speed Test</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <button
-                onClick={() => runSpeedTest("global")}
-                disabled={loadingGlobalSpeed}
-                className="w-full px-6 py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loadingGlobalSpeed ? "Testing Global Speed..." : "Test Global Speed"}
-              </button>
-              {globalSpeed !== null && (
-                <p className="mt-2 text-lg text-center">
-                  Global Speed: <span className="font-bold">{globalSpeed} Mbps</span>
-                </p>
-              )}
-            </div>
-            <div>
-              <button
-                onClick={() => runSpeedTest("bdix")}
-                disabled={loadingBdixSpeed}
-                className="w-full px-6 py-3 rounded-lg bg-green-600 text-white font-semibold hover:bg-green-700 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loadingBdixSpeed ? "Testing BDIX Speed..." : "Test BDIX Speed"}
-              </button>
-              {bdixSpeed !== null && (
-                <p className="mt-2 text-lg text-center">
-                  BDIX Speed: <span className="font-bold">{bdixSpeed} Mbps</span>
-                </p>
-              )}
-            </div>
+        <div className="mb-10 p-6 bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
+          <h2 className="text-3xl font-bold mb-6 text-white">Internet Speed Test</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <SpeedTestSection
+              title="Global Connection Speed"
+              speed={globalSpeed}
+              loading={loadingGlobalSpeed}
+              onTest={() => runSpeedTest("global")}
+              buttonText="Test Global Speed"
+            />
+            <SpeedTestSection
+              title="BDIX Connection Speed"
+              speed={bdixSpeed}
+              loading={loadingBdixSpeed}
+              onTest={() => runSpeedTest("bdix")}
+              buttonText="Test BDIX Speed"
+            />
           </div>
         </div>
 
-        {Object.keys(categorizedServers).map((type) => (
-          <div key={type} className="mb-8">
-            <h2 className="text-3xl font-bold mb-6 capitalize">{type} Servers</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {categorizedServers[type].map((server) => (
-                <div
-                  key={server.id}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300 flex flex-col justify-between"
-                >
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2">{server.name}</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Type: {server.type}</p>
-                    <p className={`text-md font-medium ${serverStatuses[server.id]?.status === "Working" ? "text-green-500" : serverStatuses[server.id]?.status === "Not Working" ? "text-red-500" : "text-yellow-500"}`}>
-                      Status: {serverStatuses[server.id]?.status || "Not Tested"}
-                    </p>
-                  </div>
-                  <div className="mt-4 flex flex-col sm:flex-row gap-2">
-                    <a
-                      href={server.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex-grow text-center px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-300 text-sm"
-                    >
-                      Open Server
-                    </a>
-                    <button
-                      onClick={() => checkServerStatus(server)}
-                      disabled={serverStatuses[server.id]?.loading}
-                      className="flex-grow px-4 py-2 rounded-lg bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors duration-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {serverStatuses[server.id]?.loading ? "Testing..." : "Test"}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
+        <div className="mb-10 p-6 bg-gray-800 rounded-xl shadow-2xl border border-gray-700">
+          <h2 className="text-3xl font-bold mb-6 text-white">BDIX Server Status</h2>
+          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            <input
+              type="text"
+              placeholder="Search servers..."
+              className="flex-grow p-4 rounded-lg bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <button
+              onClick={testAllServers}
+              disabled={loadingAll}
+              className="px-6 py-3 rounded-lg bg-gradient-to-r from-green-500 to-teal-600 text-white font-semibold hover:from-green-600 hover:to-teal-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 shadow-lg"
+            >
+              {loadingAll ? "Testing All..." : "Test All Servers"}
+            </button>
           </div>
-        ))}
+
+          <div className="flex flex-wrap gap-3 mb-8">
+            {uniqueCategories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setSelectedCategory(category)}
+                className={`px-5 py-2 rounded-full text-sm font-medium transition-all duration-300 
+                  ${selectedCategory === category
+                    ? "bg-blue-600 text-white shadow-md"
+                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"}
+                `}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+
+          {Object.keys(categorizedServers).length === 0 && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="text-center text-gray-400 text-lg mt-8"
+            >
+              No servers found matching your criteria.
+            </motion.p>
+          )}
+
+          {Object.keys(categorizedServers).map((type) => (
+            <div key={type} className="mb-8 last:mb-0">
+              <h2 className="text-3xl font-bold mb-6 capitalize text-white border-b border-gray-700 pb-3">
+                {type} Servers
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {categorizedServers[type].map((server) => (
+                  <ServerCard
+                    key={server.id}
+                    server={server}
+                    status={serverStatuses[server.id] || { status: "Not Tested", loading: false }}
+                    onTest={checkServerStatus}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </main>
     </div>
   );
