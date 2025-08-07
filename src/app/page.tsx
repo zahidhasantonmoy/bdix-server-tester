@@ -22,15 +22,15 @@ const ServerCard = ({ server, status, onTest }: {
   const statusColor = useMemo(() => {
     switch (status.status) {
       case "Working":
-        return "text-green-400";
+        return "text-neon-green";
       case "Not Working":
-        return "text-red-400";
+        return "text-destructive";
       case "Testing...":
         return "text-yellow-400";
       case "Error":
         return "text-orange-400";
       default:
-        return "text-gray-400";
+        return "text-muted-foreground";
     }
   }, [status.status]);
 
@@ -54,12 +54,12 @@ const ServerCard = ({ server, status, onTest }: {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="relative p-6 rounded-xl shadow-lg border border-gray-700 overflow-hidden card-glow"
+      className="relative p-6 rounded-xl shadow-lg border border-border overflow-hidden card-glow"
     >
       <div className="relative z-10 flex flex-col justify-between h-full">
         <div>
-          <h3 className="text-xl font-semibold mb-2 text-white">{server.name}</h3>
-          <p className="text-sm text-gray-400 mb-2">Type: {server.type}</p>
+          <h3 className="text-xl font-semibold mb-2 text-foreground">{server.name}</h3>
+          <p className="text-sm text-muted-foreground mb-2">Type: {server.type}</p>
           <p className={`text-md font-medium ${statusColor}`}>
             Status: {statusEmoji} {status.status}
           </p>
@@ -76,7 +76,7 @@ const ServerCard = ({ server, status, onTest }: {
           <button
             onClick={() => onTest(server)}
             disabled={status.loading}
-            className="flex-grow px-4 py-2 rounded-lg bg-gray-700 text-gray-200 font-semibold hover:bg-gray-600 transition-colors duration-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+            className="flex-grow px-4 py-2 rounded-lg bg-secondary text-secondary-foreground font-semibold hover:bg-accent transition-colors duration-300 text-sm disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
           >
             {status.loading ? "Testing..." : "Test"}
           </button>
@@ -99,9 +99,9 @@ const SpeedTestSection = ({
   onTest: () => void;
   buttonText: string;
 }) => (
-  <div className="relative p-6 rounded-xl shadow-lg border border-gray-700 overflow-hidden card-glow flex flex-col items-center justify-center">
+  <div className="relative p-6 rounded-xl shadow-lg border border-border overflow-hidden card-glow flex flex-col items-center justify-center">
     <div className="relative z-10 w-full flex flex-col items-center">
-      <h3 className="text-2xl font-bold mb-4 text-white">{title}</h3>
+      <h3 className="text-2xl font-bold mb-4 text-foreground">{title}</h3>
       <button
         onClick={onTest}
         disabled={loading}
@@ -114,9 +114,9 @@ const SpeedTestSection = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
-          className="mt-4 text-3xl font-bold text-blue-400"
+          className="mt-4 text-3xl font-bold text-neon-blue"
         >
-          {speed} <span className="text-xl text-gray-400">Mbps</span>
+          {speed} <span className="text-xl text-muted-foreground">Mbps</span>
         </motion.p>
       )}
     </div>
@@ -238,13 +238,13 @@ export default function Home() {
           <h1 className="text-5xl md:text-6xl font-extrabold mb-4 gradient-text">
             BDIX Nexus
           </h1>
-          <p className="text-lg md:text-xl text-gray-300">
+          <p className="text-lg md:text-xl text-muted-foreground">
             Your gateway to BDIX server status and internet speed insights.
           </p>
         </motion.div>
 
         <div className="mb-10 p-6 bg-card rounded-xl shadow-2xl border border-border">
-          <h2 className="text-3xl font-bold mb-6 text-white">Internet Speed Test</h2>
+          <h2 className="text-3xl font-bold mb-6 text-foreground">Internet Speed Test</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <SpeedTestSection
               title="Global Connection Speed"
@@ -264,12 +264,12 @@ export default function Home() {
         </div>
 
         <div className="mb-10 p-6 bg-card rounded-xl shadow-2xl border border-border">
-          <h2 className="text-3xl font-bold mb-6 text-white">BDIX Server Status</h2>
+          <h2 className="text-3xl font-bold mb-6 text-foreground">BDIX Server Status</h2>
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <input
               type="text"
               placeholder="Search servers..."
-              className="flex-grow p-4 rounded-lg bg-muted text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-primary placeholder-muted-foreground"
+              className="flex-grow p-4 rounded-lg bg-input text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-primary placeholder-muted-foreground"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -311,7 +311,7 @@ export default function Home() {
 
           {Object.keys(categorizedServers).map((type) => (
             <div key={type} className="mb-8 last:mb-0">
-              <h2 className="text-2xl font-bold mb-4 capitalize text-white border-b border-border pb-2">
+              <h2 className="text-2xl font-bold mb-4 capitalize text-foreground border-b border-border pb-2">
                 {type} Servers
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
