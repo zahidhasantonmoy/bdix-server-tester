@@ -1,0 +1,63 @@
+
+[
+  {
+    "id": 1,
+    "name": "Sam Online",
+    "url": "http://103.113.16.242/",
+    "type": "FTP"
+  },
+  {
+    "id": 2,
+    "name": "Circle Network",
+    "url": "http://103.81.104.2/",
+    "type": "FTP"
+  },
+  {
+    "id": 3,
+    "name": "ICC Communication",
+    "url": "http://103.119.122.2/",
+    "type": "FTP"
+  },
+  {
+    "id": 4,
+    "name": "Discovery Net",
+    "url": "http://103.163.156.2/",
+    "type": "FTP"
+  },
+  {
+    "id": 5,
+    "name": "BDIX TV",
+    "url": "http://103.108.140.250/",
+    "type": "TV"
+  },
+  {
+    "id": 6,
+    "name": "Bongo BD",
+    "url": "https://www.bongobd.com/",
+    "type": "Movie"
+  },
+  {
+    "id": 7,
+    "name": "Bioscope",
+    "url": "https://www.bioscopelive.com/",
+    "type": "Movie"
+  },
+  {
+    "id": 8,
+    "name": "Toffee",
+    "url": "https://toffeelive.com/",
+    "type": "Movie"
+  },
+  {
+    "id": 9,
+    "name": "BDIX Sports",
+    "url": "http://103.108.140.250/",
+    "type": "TV"
+  },
+  {
+    "id": 10,
+    "name": "FTP BD",
+    "url": "http://www.ftpbd.net/",
+    "type": "FTP"
+  }
+]
