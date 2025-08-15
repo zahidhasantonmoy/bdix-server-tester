@@ -1,13 +1,13 @@
 [
-  { "id": 1, "name": "SAM Online FTP", "url": "http://103.113.16.242/", "type": "General" },
-  { "id": 2, "name": "Business Network (FTPBD)", "url": "http://ftpbd.net/", "type": "General" },
-  { "id": 3, "name": "Circle Network FTP", "url": "http://103.81.104.2/", "type": "General" },
-  { "id": 4, "name": "Cogent Broadband (Khulnaflix)", "url": "http://khulnaflix.com/", "type": "General" },
-  { "id": 5, "name": "Discovery Internet FTP", "url": "http://103.163.156.2/", "type": "General" },
-  { "id": 6, "name": "One Net Communications (Showtime)", "url": "http://103.108.140.250/", "type": "General" },
+  { "id": 1, "name": "Sam Online FTP", "url": "http://103.113.16.242/", "type": "General" },
+  { "id": 2, "name": "Circle Network FTP", "url": "http://103.81.104.2/", "type": "General" },
+  { "id": 3, "name": "ICC Communication FTP", "url": "http://103.119.122.2/", "type": "General" },
+  { "id": 4, "name": "Discovery Net FTP", "url": "http://103.163.156.2/", "type": "General" },
+  { "id": 5, "name": "Business Network (FTPBD)", "url": "http://ftpbd.net/", "type": "General" },
+  { "id": 6, "name": "Cogent Broadband (KhulnaFlix)", "url": "http://khulnaflix.com/", "type": "General" },
   { "id": 7, "name": "Digital Dot Net (Ctgmovies)", "url": "http://ctgmovies.com/", "type": "General" },
   { "id": 8, "name": "Exord Online (E-Box Live) FTP", "url": "http://ebox.live/", "type": "General" },
-  { "id": 9, "name": "ICC Communication Limited FTP", "url": "http://103.119.122.2/", "type": "General" },
+  { "id": 9, "name": "One Net Communications (Showtime)", "url": "http://103.108.140.250/", "type": "General" },
   { "id": 10, "name": "Antaranga Dot Com (Dhakamovie)", "url": "http://dhakamovie.com/", "type": "General" },
   { "id": 11, "name": "X-Press Technologies (Naturalbd)", "url": "http://naturalbd.com/", "type": "General" },
   { "id": 12, "name": "Skyview Online (Timepassbd)", "url": "http://timepassbd.com/", "type": "General" },
@@ -30,5 +30,7 @@
   { "id": 29, "name": "DDN (Ctgtv) Live TV", "url": "http://ddn.com.bd/tv/", "type": "TV" },
   { "id": 30, "name": "AMRBD Live TV", "url": "http://amrbd.com/tv/", "type": "TV" },
   { "id": 31, "name": "Exord Online (E-Box Live) Live TV", "url": "http://ebox.live/tv/", "type": "TV" },
-  { "id": 32, "name": "Chittagong Online Limited Live TV", "url": "http://colbd.com/tv/", "type": "TV" }
+  { "id": 32, "name": "Chittagong Online Limited Live TV", "url": "http://colbd.com/tv/", "type": "TV" },
+  { "id": 33, "name": "BDIX TV 247", "url": "http://bdix.tv247.com/", "type": "TV" },
+  { "id": 34, "name": "Durbin TV", "url": "http://durbintv.com/", "type": "TV" }
 ]
