@@ -13,7 +13,7 @@ export default function Home() {
   const [servers, setServers] = useState<Server[]>([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
-  const [testSpeed, setTestSpeed] = useState<"fast" | "medium" | "slow">("medium"); // New state for test speed
+  const [testSpeed, setTestSpeed] = useState<"fast" | "medium" | "slow">("medium");
 
   useEffect(() => {
     fetch("/servers.json")
@@ -37,7 +37,7 @@ export default function Home() {
   }, [servers, search, selectedCategory]);
 
   const handleStartTest = () => {
-    let concurrencyLimit = 5; // Medium
+    let concurrencyLimit = 5;
     if (testSpeed === "fast") {
       concurrencyLimit = 10;
     } else if (testSpeed === "slow") {
@@ -56,7 +56,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="mb-8 flex flex-col sm:flex-row gap-4 items-center"> {/* Added items-center */}
+        <div className="mb-8 flex flex-col sm:flex-row gap-4 items-center">
           <input
             type="text"
             placeholder="Search for a server..."
@@ -65,7 +65,7 @@ export default function Home() {
             onChange={(e) => setSearch(e.target.value)}
           />
           <button
-            onClick={handleStartTest} // Changed to handleStartTest
+            onClick={handleStartTest}
             disabled={isTesting}
             className="p-0 rounded-full bg-[var(--accent)] text-black font-semibold hover:bg-opacity-80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed w-24 h-24 flex items-center justify-center text-center animate-pulse-glow"
           >
@@ -114,46 +114,91 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredServers.map((server) => {
-            const result = testResults.find((r) => r.id === server.id);
-            const statusColor =
-              result?.status === "online"
-                ? "text-green-500"
-                : result?.status === "offline"
-                ? "text-red-500"
-                : "text-yellow-500";
-            const statusText =
-              result?.status === "online"
-                ? "Online"
-                : result?.status === "offline"
-                ? "Offline"
-                : "Testing...";
+        {selectedCategory === "General" ? (
+          <div className="space-y-4"> {/* List view for General category */}
+            {filteredServers.map((server) => {
+              const result = testResults.find((r) => r.id === server.id);
+              const statusColor =
+                result?.status === "online"
+                  ? "text-green-500"
+                  : result?.status === "offline"
+                  ? "text-red-500"
+                  : "text-yellow-500";
+              const statusText =
+                result?.status === "online"
+                  ? "Online"
+                  : result?.status === "offline"
+                  ? "Offline"
+                  : "Testing...";
 
-            return (
-              <div
-                key={server.id}
-                className="bg-[var(--card-background)] rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-              >
-                <h2 className="text-2xl font-semibold mb-2 text-[var(--foreground)]">{server.name}</h2>
-                <p className={`text-sm ${statusColor} mb-2`}>
-                  Status: {statusText} {result?.responseTime ? `(${result.responseTime}ms)` : ""}
-                </p>
-                {result?.status === "offline" && result.error && (
-                  <p className="text-xs text-red-400 mb-2">Error: {result.error}</p>
-                )}
-                <a
-                  href={server.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[var(--accent)] hover:underline"
+              return (
+                <div
+                  key={server.id}
+                  className="bg-[var(--card-background)] rounded-lg shadow-lg p-4 flex items-center justify-between transition-all duration-300 hover:shadow-xl"
                 >
-                  Go to Server
-                </a>
-              </div>
-            );
-          })}
-        </div>
+                  <div className="flex-grow">
+                    <h2 className="text-xl font-semibold text-[var(--foreground)]">{server.name}</h2>
+                    <p className={`text-sm ${statusColor}`}>
+                      Status: {statusText} {result?.responseTime ? `(${result.responseTime}ms)` : ""}
+                    </p>
+                    {result?.status === "offline" && result.error && (
+                      <p className="text-xs text-red-400">Error: {result.error}</p>
+                    )}
+                  </div>
+                  <a
+                    href={server.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[var(--accent)] hover:underline flex-shrink-0 ml-4"
+                  >
+                    Go to Server
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"> {/* Grid view for other categories */}
+            {filteredServers.map((server) => {
+              const result = testResults.find((r) => r.id === server.id);
+              const statusColor =
+                result?.status === "online"
+                  ? "text-green-500"
+                  : result?.status === "offline"
+                  ? "text-red-500"
+                  : "text-yellow-500";
+              const statusText =
+                result?.status === "online"
+                  ? "Online"
+                  : result?.status === "offline"
+                  ? "Offline"
+                  : "Testing...";
+
+              return (
+                <div
+                  key={server.id}
+                  className="bg-[var(--card-background)] rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                >
+                  <h2 className="text-2xl font-semibold mb-2 text-[var(--foreground)]">{server.name}</h2>
+                  <p className={`text-sm ${statusColor} mb-2`}>
+                    Status: {statusText} {result?.responseTime ? `(${result.responseTime}ms)` : ""}
+                  </p>
+                  {result?.status === "offline" && result.error && (
+                    <p className="text-xs text-red-400 mb-2">Error: {result.error}</p>
+                  )}
+                  <a
+                    href={server.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[var(--accent)] hover:underline"
+                  >
+                    Go to Server
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </main>
     </div>
   );
