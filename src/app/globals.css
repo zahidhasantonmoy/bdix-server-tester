@@ -4,6 +4,11 @@
   --background: #0a0a0a; /* Very dark background */
   --foreground: #e0e0e0; /* Light gray text */
   --accent: #00f0ff; /* Cyan accent color */
+
+  --foreground-muted: #a0a0a0; /* Muted gray for secondary text */
+  --background-light: #1a1a1a; /* Slightly lighter dark for input/card backgrounds */
+  --border-color: #333333; /* Darker border color */
+  --card-background: #1a1a1a; /* Same as background-light for cards */
 }
 
 @theme inline {
