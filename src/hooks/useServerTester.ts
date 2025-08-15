@@ -21,12 +21,10 @@ const useServerTester = (servers: Server[]) => {
   const testServer = useCallback(async (server: Server): Promise<TestResult> => {
     const startTime = Date.now();
     try {
-      const response = await fetch(server.url, { mode: 'no-cors' }); // Use no-cors for external URLs
+      const response = await fetch(server.url, { mode: 'no-cors' });
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
-      // For no-cors, we can't check status directly, so we assume success if no network error
-      // A more robust solution would involve a proxy or a backend endpoint
       return {
         id: server.id,
         status: 'online',
@@ -44,18 +42,41 @@ const useServerTester = (servers: Server[]) => {
     }
   }, []);
 
-  const startTesting = useCallback(async () => {
+  const startTesting = useCallback(async (concurrencyLimit: number = 5) => { // Added concurrencyLimit
     setIsTesting(true);
     setTestResults(servers.map(server => ({ id: server.id, status: 'testing' })));
 
-    const results: TestResult[] = [];
-    for (const server of servers) {
-      const result = await testServer(server);
-      results.push(result);
-      setTestResults(prevResults =>
-        prevResults.map(r => (r.id === result.id ? result : r))
-      );
-    }
+    const queue = [...servers];
+    const activePromises: Promise<void>[] = [];
+
+    const processQueue = async () => {
+      while (queue.length > 0 || activePromises.length > 0) {
+        // Start new tests if concurrency limit allows
+        while (queue.length > 0 && activePromises.length < concurrencyLimit) {
+          const server = queue.shift();
+          if (server) {
+            const promise = testServer(server).then(result => {
+              setTestResults(prevResults =>
+                prevResults.map(r => (r.id === result.id ? result : r))
+              );
+            }).finally(() => {
+              // Remove the promise from activePromises when it settles
+              activePromises.splice(activePromises.indexOf(promise), 1);
+            });
+            activePromises.push(promise);
+          }
+        }
+        // Wait for at least one active promise to settle before continuing
+        if (activePromises.length > 0) {
+          await Promise.race(activePromises);
+        } else if (queue.length === 0) {
+          // If queue is empty and no active promises, we are done
+          break;
+        }
+      }
+    };
+
+    await processQueue();
     setIsTesting(false);
   }, [servers, testServer]);
 
