@@ -49,14 +49,14 @@ export default function Home() {
   return (
     <div className="font-sans bg-[var(--background)] text-[var(--foreground)] min-h-screen transition-colors duration-500">
       <main className="container mx-auto p-4 sm:p-6 lg:p-8">
-        <div className="text-center mb-8">
+        <div className="text-center mb-6"> {/* Changed mb-8 to mb-6 */}
           <h1 className="text-4xl font-bold text-[var(--foreground)]">BDIX Server List</h1>
           <p className="text-lg text-[var(--foreground-muted)]">
             A list of BDIX hosted servers.
           </p>
         </div>
 
-        <div className="mb-8 flex flex-col sm:flex-row gap-4 items-center">
+        <div className="mb-6 flex flex-col sm:flex-row gap-4 items-center"> {/* Changed mb-8 to mb-6 */}
           <input
             type="text"
             placeholder="Search for a server..."
@@ -81,7 +81,7 @@ export default function Home() {
         </div>
 
         {/* Test Speed Options */}
-        <div className="mb-8 flex flex-wrap gap-2 justify-center">
+        <div className="mb-6 flex flex-wrap gap-2 justify-center"> {/* Changed mb-8 to mb-6 */}
           {["fast", "medium", "slow"].map((speed) => (
             <button
               key={speed}
@@ -98,7 +98,7 @@ export default function Home() {
         </div>
 
         {/* Category Filter Buttons */}
-        <div className="mb-8 flex flex-wrap gap-2 justify-center">
+        <div className="mb-6 flex flex-wrap gap-2 justify-center"> {/* Changed mb-8 to mb-6 */}
           {categories.map((category) => (
             <button
               key={category}
@@ -115,7 +115,7 @@ export default function Home() {
         </div>
 
         {selectedCategory === "General" ? (
-          <div className="space-y-4"> {/* List view for General category */}
+          <div className="space-y-3"> {/* Changed space-y-4 to space-y-3 */}
             {filteredServers.map((server) => {
               const result = testResults.find((r) => r.id === server.id);
               const statusColor =
@@ -158,7 +158,7 @@ export default function Home() {
             })}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"> {/* Grid view for other categories */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5"> {/* Changed gap-6 to gap-5 */}
             {filteredServers.map((server) => {
               const result = testResults.find((r) => r.id === server.id);
               const statusColor =
