@@ -113,6 +113,9 @@ export default function Home() {
                 <p className={`text-sm ${statusColor} mb-2`}>
                   Status: {statusText} {result?.responseTime ? `(${result.responseTime}ms)` : ""}
                 </p>
+                {result?.status === "offline" && result.error && (
+                  <p className="text-xs text-red-400 mb-2">Error: {result.error}</p>
+                )}
                 <a
                   href={server.url}
                   target="_blank"
