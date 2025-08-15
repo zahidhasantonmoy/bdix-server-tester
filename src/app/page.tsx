@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useMemo } from "react"; // Added useMemo
+import { useEffect, useState, useMemo } from "react";
 import useServerTester from "../hooks/useServerTester";
 
 interface Server {
@@ -12,7 +12,8 @@ interface Server {
 export default function Home() {
   const [servers, setServers] = useState<Server[]>([]);
   const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("All"); // New state for category
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [testSpeed, setTestSpeed] = useState<"fast" | "medium" | "slow">("medium"); // New state for test speed
 
   useEffect(() => {
     fetch("/servers.json")
@@ -22,7 +23,6 @@ export default function Home() {
 
   const { testResults, isTesting, startTesting, resetTesting } = useServerTester(servers);
 
-  // Get unique categories from servers
   const categories = useMemo(() => {
     const uniqueCategories = new Set(servers.map(server => server.type));
     return ["All", ...Array.from(uniqueCategories)];
@@ -36,6 +36,15 @@ export default function Home() {
     });
   }, [servers, search, selectedCategory]);
 
+  const handleStartTest = () => {
+    let concurrencyLimit = 5; // Medium
+    if (testSpeed === "fast") {
+      concurrencyLimit = 10;
+    } else if (testSpeed === "slow") {
+      concurrencyLimit = 1;
+    }
+    startTesting(concurrencyLimit);
+  };
 
   return (
     <div className="font-sans bg-[var(--background)] text-[var(--foreground)] min-h-screen transition-colors duration-500">
@@ -47,7 +56,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="mb-8 flex flex-col sm:flex-row gap-4">
+        <div className="mb-8 flex flex-col sm:flex-row gap-4 items-center"> {/* Added items-center */}
           <input
             type="text"
             placeholder="Search for a server..."
@@ -56,7 +65,7 @@ export default function Home() {
             onChange={(e) => setSearch(e.target.value)}
           />
           <button
-            onClick={startTesting}
+            onClick={handleStartTest} // Changed to handleStartTest
             disabled={isTesting}
             className="p-0 rounded-full bg-[var(--accent)] text-black font-semibold hover:bg-opacity-80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed w-24 h-24 flex items-center justify-center text-center animate-pulse-glow"
           >
@@ -69,6 +78,23 @@ export default function Home() {
           >
             Restart Test
           </button>
+        </div>
+
+        {/* Test Speed Options */}
+        <div className="mb-8 flex flex-wrap gap-2 justify-center">
+          {["fast", "medium", "slow"].map((speed) => (
+            <button
+              key={speed}
+              onClick={() => setTestSpeed(speed as "fast" | "medium" | "slow")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 capitalize
+                ${testSpeed === speed
+                  ? "bg-[var(--accent)] text-black"
+                  : "bg-[var(--background-light)] text-[var(--foreground)] hover:bg-[var(--border-color)]"
+                }`}
+            >
+              {speed}
+            </button>
+          ))}
         </div>
 
         {/* Category Filter Buttons */}
