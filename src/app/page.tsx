@@ -103,7 +103,7 @@ export default function Home() {
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 capitalize
                 ${selectedCategory === category
                   ? "bg-[var(--accent)] text-black"
                   : "bg-[var(--background-light)] text-[var(--foreground)] hover:bg-[var(--border-color)]"
