@@ -58,7 +58,7 @@ export default function Home() {
           <button
             onClick={startTesting}
             disabled={isTesting}
-            className="px-6 py-3 rounded-lg bg-[var(--accent)] text-black font-semibold hover:bg-opacity-80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-0 rounded-full bg-[var(--accent)] text-black font-semibold hover:bg-opacity-80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed w-24 h-24 flex items-center justify-center text-center animate-pulse-glow"
           >
             {isTesting ? "Testing..." : "Start Test"}
           </button>
