@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import useServerTester from "../hooks/useServerTester"; // Adjust path if necessary
 
 interface Server {
   id: number;
@@ -18,6 +19,8 @@ export default function Home() {
       .then((data) => setServers(data));
   }, []);
 
+  const { testResults, isTesting, startTesting, resetTesting } = useServerTester(servers);
+
   const filteredServers = servers.filter((server) =>
     server.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -32,33 +35,66 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="mb-8">
+        <div className="mb-8 flex flex-col sm:flex-row gap-4">
           <input
             type="text"
             placeholder="Search for a server..."
-            className="w-full p-4 rounded-lg bg-[var(--background-light)] border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] transition-all duration-300 text-[var(--foreground)]"
+            className="flex-grow p-4 rounded-lg bg-[var(--background-light)] border border-[var(--border-color)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)] transition-all duration-300 text-[var(--foreground)]"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+          <button
+            onClick={startTesting}
+            disabled={isTesting}
+            className="px-6 py-3 rounded-lg bg-[var(--accent)] text-black font-semibold hover:bg-opacity-80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isTesting ? "Testing..." : "Start Test"}
+          </button>
+          <button
+            onClick={resetTesting}
+            disabled={isTesting}
+            className="px-6 py-3 rounded-lg bg-gray-600 text-white font-semibold hover:bg-opacity-80 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Restart Test
+          </button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredServers.map((server) => (
-            <div
-              key={server.id}
-              className="bg-[var(--card-background)] rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
-            >
-              <h2 className="text-2xl font-semibold mb-2 text-[var(--foreground)]">{server.name}</h2>
-              <a
-                href={server.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[var(--accent)] hover:underline"
+          {filteredServers.map((server) => {
+            const result = testResults.find((r) => r.id === server.id);
+            const statusColor =
+              result?.status === "online"
+                ? "text-green-500"
+                : result?.status === "offline"
+                ? "text-red-500"
+                : "text-yellow-500";
+            const statusText =
+              result?.status === "online"
+                ? "Online"
+                : result?.status === "offline"
+                ? "Offline"
+                : "Testing...";
+
+            return (
+              <div
+                key={server.id}
+                className="bg-[var(--card-background)] rounded-lg shadow-lg p-6 hover:shadow-xl transition-all duration-300 transform hover:scale-105"
               >
-                Go to Server
-              </a>
-            </div>
-          ))}
+                <h2 className="text-2xl font-semibold mb-2 text-[var(--foreground)]">{server.name}</h2>
+                <p className={`text-sm ${statusColor} mb-2`}>
+                  Status: {statusText} {result?.responseTime ? `(${result.responseTime}ms)` : ""}
+                </p>
+                <a
+                  href={server.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[var(--accent)] hover:underline"
+                >
+                  Go to Server
+                </a>
+              </div>
+            );
+          })}
         </div>
       </main>
     </div>
