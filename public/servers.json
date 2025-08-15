@@ -1,28 +1,27 @@
-
 [
   {
     "id": 1,
     "name": "Sam Online",
     "url": "http://103.113.16.242/",
-    "type": "FTP"
+    "type": "General"
   },
   {
     "id": 2,
     "name": "Circle Network",
     "url": "http://103.81.104.2/",
-    "type": "FTP"
+    "type": "General"
   },
   {
     "id": 3,
     "name": "ICC Communication",
     "url": "http://103.119.122.2/",
-    "type": "FTP"
+    "type": "General"
   },
   {
     "id": 4,
     "name": "Discovery Net",
     "url": "http://103.163.156.2/",
-    "type": "FTP"
+    "type": "General"
   },
   {
     "id": 5,
@@ -58,6 +57,6 @@
     "id": 10,
     "name": "FTP BD",
     "url": "http://www.ftpbd.net/",
-    "type": "FTP"
+    "type": "General"
   }
 ]
