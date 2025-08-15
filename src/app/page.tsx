@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
-import useServerTester from "../hooks/useServerTester"; // Adjust path if necessary
+import { useEffect, useState, useMemo } from "react"; // Added useMemo
+import useServerTester from "../hooks/useServerTester";
 
 interface Server {
   id: number;
@@ -12,6 +12,7 @@ interface Server {
 export default function Home() {
   const [servers, setServers] = useState<Server[]>([]);
   const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All"); // New state for category
 
   useEffect(() => {
     fetch("/servers.json")
@@ -21,9 +22,20 @@ export default function Home() {
 
   const { testResults, isTesting, startTesting, resetTesting } = useServerTester(servers);
 
-  const filteredServers = servers.filter((server) =>
-    server.name.toLowerCase().includes(search.toLowerCase())
-  );
+  // Get unique categories from servers
+  const categories = useMemo(() => {
+    const uniqueCategories = new Set(servers.map(server => server.type));
+    return ["All", ...Array.from(uniqueCategories)];
+  }, [servers]);
+
+  const filteredServers = useMemo(() => {
+    return servers.filter((server) => {
+      const matchesSearch = server.name.toLowerCase().includes(search.toLowerCase());
+      const matchesCategory = selectedCategory === "All" || server.type === selectedCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [servers, search, selectedCategory]);
+
 
   return (
     <div className="font-sans bg-[var(--background)] text-[var(--foreground)] min-h-screen transition-colors duration-500">
@@ -57,6 +69,23 @@ export default function Home() {
           >
             Restart Test
           </button>
+        </div>
+
+        {/* Category Filter Buttons */}
+        <div className="mb-8 flex flex-wrap gap-2 justify-center">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200
+                ${selectedCategory === category
+                  ? "bg-[var(--accent)] text-black"
+                  : "bg-[var(--background-light)] text-[var(--foreground)] hover:bg-[var(--border-color)]"
+                }`}
+            >
+              {category}
+            </button>
+          ))}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
