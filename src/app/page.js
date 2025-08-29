@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiWifi, FiWifiOff, FiLoader, FiRefreshCw, FiServer, FiCheckCircle, FiXCircle, FiClock, FiSearch, FiFacebook, FiLinkedin, FiGithub, FiGlobe } from 'react-icons/fi';
+import { FiWifi, FiWifiOff, FiLoader, FiRefreshCw, FiServer, FiCheckCircle, FiXCircle, FiClock, FiSearch, FiFacebook, FiLinkedin, FiGithub, FiGlobe, FiExternalLink } from 'react-icons/fi';
 import { bdixServers } from './data/servers';
 
 export default function Home() {
@@ -68,6 +68,10 @@ export default function Home() {
       ...prev,
       [serverName]: !prev[serverName]
     }));
+  };
+
+  const openUrlInNewTab = (url) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const getStatusIcon = (status) => {
@@ -355,18 +359,22 @@ export default function Home() {
                                 initial={{ opacity: 0, x: -10 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: urlIndex * 0.05 }}
-                                className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border"
+                                className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors cursor-pointer"
+                                onClick={() => openUrlInNewTab(url)}
                               >
                                 <span className="text-sm text-gray-600 truncate mr-2 flex items-center gap-2">
                                   <FiWifi className="text-gray-400 flex-shrink-0" />
                                   <span className="truncate">{url}</span>
                                 </span>
-                                <span
-                                  className={`px-3 py-1 text-xs font-semibold rounded-full border flex items-center gap-1 whitespace-nowrap ${getStatusColor(status)}`}
-                                >
-                                  {getStatusIcon(status)}
-                                  <span>{status}</span>
-                                </span>
+                                <div className="flex items-center gap-2">
+                                  <FiExternalLink className="text-gray-400" />
+                                  <span
+                                    className={`px-3 py-1 text-xs font-semibold rounded-full border flex items-center gap-1 whitespace-nowrap ${getStatusColor(status)}`}
+                                  >
+                                    {getStatusIcon(status)}
+                                    <span>{status}</span>
+                                  </span>
+                                </div>
                               </motion.li>
                             );
                           })}
@@ -384,8 +392,10 @@ export default function Home() {
                         return (
                           <span
                             key={urlIndex}
-                            className={`px-2 py-1 text-xs font-semibold rounded-full border flex items-center gap-1 ${getStatusColor(status)}`}
+                            className={`px-2 py-1 text-xs font-semibold rounded-full border flex items-center gap-1 ${getStatusColor(status)} cursor-pointer hover:opacity-80 transition-opacity`}
+                            onClick={() => openUrlInNewTab(url)}
                           >
+                            <FiExternalLink className="text-gray-500" />
                             {getStatusIcon(status)}
                             <span className="truncate max-w-[100px]">{url.replace('http://', '').replace('https://', '')}</span>
                           </span>
