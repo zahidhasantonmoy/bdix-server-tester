@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 
+// Define the Server interface to match what's used in page.tsx
 interface Server {
   id: number;
   name: string;
-  url: string;
+  addresses: string[];
   type: string;
 }
 
@@ -19,9 +20,14 @@ const useServerTester = (servers: Server[]) => {
   const [isTesting, setIsTesting] = useState(false);
 
   const testServer = useCallback(async (server: Server): Promise<TestResult> => {
+    // For now, we'll test the first address in the addresses array
+    const url = server.addresses[0];
     const startTime = Date.now();
     try {
-      const response = await fetch(server.url, { mode: 'no-cors' });
+      // We're using no-cors mode to avoid CORS issues
+      // This means we won't be able to read the response body,
+      // but we can still check if the server is reachable.
+      await fetch(url, { mode: 'no-cors' });
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
@@ -30,21 +36,32 @@ const useServerTester = (servers: Server[]) => {
         status: 'online',
         responseTime: responseTime,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       const endTime = Date.now();
       const responseTime = endTime - startTime;
+      let errorMessage = 'An unknown error occurred';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      }
       return {
         id: server.id,
         status: 'offline',
         responseTime: responseTime,
-        error: error.message,
+        error: errorMessage,
       };
     }
   }, []);
 
-  const startTesting = useCallback(async (concurrencyLimit: number = 5) => { // Added concurrencyLimit
+  const startTesting = useCallback(async (concurrencyLimit: number = 5) => {
     setIsTesting(true);
-    setTestResults(servers.map(server => ({ id: server.id, status: 'testing' })));
+    // Initialize all servers as "testing"
+    const initialResults = servers.map(server => ({ 
+      id: server.id, 
+      status: 'testing' as const,
+      responseTime: undefined,
+      error: undefined
+    }));
+    setTestResults(initialResults);
 
     const queue = [...servers];
     const activePromises: Promise<void>[] = [];
@@ -61,7 +78,10 @@ const useServerTester = (servers: Server[]) => {
               );
             }).finally(() => {
               // Remove the promise from activePromises when it settles
-              activePromises.splice(activePromises.indexOf(promise), 1);
+              const index = activePromises.indexOf(promise);
+              if (index !== -1) {
+                activePromises.splice(index, 1);
+              }
             });
             activePromises.push(promise);
           }
@@ -87,7 +107,13 @@ const useServerTester = (servers: Server[]) => {
 
   useEffect(() => {
     // Initialize test results when servers change
-    setTestResults(servers.map(server => ({ id: server.id, status: 'testing' })));
+    const initialResults = servers.map(server => ({ 
+      id: server.id, 
+      status: 'testing' as const,
+      responseTime: undefined,
+      error: undefined
+    }));
+    setTestResults(initialResults);
   }, [servers]);
 
 

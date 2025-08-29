@@ -1,271 +1,436 @@
-[
-  "http://172.16.50.4",
-  "http://172.16.50.5",
-  "https://samftp.com",
-  "http://discoveryftp.net",
-  "http://172.27.27.84",
-  "http://ftpbd.net",
-  "http://103.58.73.9",
-  "http://media.ftpbd.net",
-  "http://server1.ftpbd.net",
-  "http://server4.ftpbd.net",
-  "http://10.16.100.244",
-  "http://www.naturalbd.com",
-  "http://new.naturalbd.com",
-  "http://dhakamovie.com",
-  "http://103.91.144.230",
-  "http://ctgmovies.com",
-  "http://crazyctg.com",
-  "http://www.ctgflix.com",
-  "http://media.ctgfun.com",
-  "http://fs.evillagectg.com",
-  "http://www.ctghall.com",
-  "http://www.ctgstream.com",
-  "https://www.ctghub.com",
-  "http://www.cinehub24.com",
-  "http://moviehaat.net",
-  "http://fs.ebox.live",
-  "http://103.49.168.107",
-  "http://fileserver.ebox.live",
-  "http://12.1.1.2",
-  "http://12.1.1.3/flix",
-  "http://pollyflix.com",
-  "http://fs.amrbd.com",
-  "http://fs2.amrbd.com",
-  "http://103.102.253.250",
-  "http://103.3.226.208",
-  "http://www.bossbd.net",
-  "http://bossbd.live",
-  "http://cdn.bossbd.net",
-  "http://cdn1.bossbd.net",
-  "http://cdn2.bossbd.net",
-  "http://mymoviebazar.com",
-  "http://www.alphabroadway.com",
-  "http://ftp.alphamediazone.com",
-  "http://bdplex.net",
-  "http://103.200.36.242",
-  "http://www.timepassbd.live",
-  "http://ftp.timepassbd.live",
-  "http://www.freedownloadbd.com",
-  "http://15.1.1.1",
-  "http://circleftp.net",
-  "http://ftp2.circleftp.net",
-  "http://hd.circleftp.net",
-  "http://172.22.22.101",
-  "http://ftpweb.mazedanetworks.net",
-  "http://ihub.live",
-  "http://www.nagordola.com.bd",
-  "http://cinemabazar.net",
-  "http://103.81.104.98",
-  "http://cinemabazar.net/DATA/NAS1",
-  "https://infolinkbd.com",
-  "http://103.102.253.250",
-  "http://103.103.239.66",
-  "http://abcflixbd.com",
-  "http://dekhvhai.com",
-  "http://asianftp.com",
-  "https://mojaloss.net",
-  "http://www.elaach.com",
-  "http://dhakaftp.com",
-  "http://103.76.196.90",
-  "https://dnetdrive.com",
-  "http://vdomela.com",
-  "https://sunplex.net",
-  "http://www.moviemela.live",
-  "http://movieboxbd.com",
-  "http://patalpuri.com",
-  "https://www.netathomebd.com",
-  "http://funtimebd.com",
-  "http://funtime.com.bd",
-  "http://103.109.56.114",
-  "http://103.109.56.115",
-  "https://www.rangdhanu.live",
-  "http://fs.rangdhanu.live",
-  "http://emby.rangdhanu.live",
-  "http://www.showtimebd.com",
-  "http://digbazi.net",
-  "http://media.dfnbd.net",
-  "http://10.100.100.2",
-  "http://www.evonetbd.com",
-  "https://dreamnetbd.com",
-  "http://bddreamnet.blogspot.com",
-  "http://www.bdlan.net",
-  "http://103.102.27.170",
-  "http://www.cinebioscope.com",
-  "http://midiplex.net",
-  "http://cdn.midiplex.net",
-  "http://103.195.1.50",
-  "http://www.tajpata.com",
-  "http://file.tajpata.com",
-  "http://bitflixbd.com",
-  "http://khulnaflix.net",
-  "http://file.khulnaflix.net",
-  "http://skynet.com.bd/ftp",
-  "http://103.85.235.254",
-  "https://www.anosbd.com",
-  "https://www.anosbd.com/ftp",
-  "http://www.bdspeed.com",
-  "https://moviescounterhd.club",
-  "http://www.netmatrixbd.com",
-  "http://www.bolmovies.com",
-  "http://uturnbd.live",
-  "http://172.16.16.3",
-  "http://172.16.16.5",
-  "http://172.16.16.6",
-  "https://www.rainbownetworkbd.com",
-  "http://cinemacity.live",
-  "https://asiannetworkbd.net",
-  "http://www.furiousnet.net",
-  "http://media.furiousnet.net",
-  "https://www.tetrasoftbd.com",
-  "http://tetraplex.net.bd",
-  "https://www.sknetcity.com",
-  "http://www.univisionbd.net",
-  "https://www.iflix.com",
-  "http://leadtechnologybd.com/bdix-server",
-  "http://quickonlineftp.com",
-  "https://slnisp.com.bd",
-  "https://www.skynetbd.net",
-  "http://sbnetworkbd.com",
-  "https://easyitbd.com",
-  "http://103.112.63.21",
-  "http://103.70.140.14",
-  "https://sparklinkbd.com",
-  "http://www.fnetctg.com/index.php/bdix-list",
-  "http://flashnetbd.com",
-  "https://sparknetbd.com",
-  "http://www.fnfonlinebd.com",
-  "http://103.82.8.194",
-  "http://movies.fnfonlinebd.com",
-  "https://alifanet.com",
-  "http://serverbd247.com",
-  "http://103.113.16.46",
-  "https://msmonlinebd.com",
-  "http://www.dhakadownload.com",
-  "http://dhakaiptv.com",
-  "https://btekbd.com",
-  "https://netcomisp.net",
-  "http://www.flashnetbd.com",
-  "http://203.83.177.225",
-  "http://www.univisionbd.net",
-  "https://www.skybizbd.net",
-  "https://www.applenetbd.com",
-  "http://supernetsenbag.com",
-  "http://www.movieserver.net",
-  "https://skynetonlinebd.net",
-  "http://www.roarzone.info",
-  "http://roarmediazone.com",
-  "https://rapidnetbd.com",
-  "https://rapidnetbd.com/FTP.html",
-  "https://mlwbd.pw",
-  "https://bonsaihd.live",
-  "https://basnetbd.com",
-  "http://movie.basnetbd.com",
-  "http://103.126.12.226",
-  "http://162.12.215.254",
-  "http://gpisp.net",
-  "http://www.onnosomoy.com:8096/web/index.html#!/startup/login.html?serverId=89ea8d6de5814c3b93294ebba34da8bd",
-  "http://mtbsl.com",
-  "http://bdix.mtbsl.com/server.php",
-  "http://exploreonlinebd.net",
-  "http://103.222.20.150",
-  "http://103.85.160.7",
-  "http://netcode.live/netcodemedia",
-  "http://202.94.164.102",
-  "http://unique24.net",
-  "http://media.unique24.net",
-  "https://rioctg.blogspot.com",
-  "http://3netbd.com",
-  "https://epnetbd.com",
-  "http://focusflix.com/ftp",
-  "http://103.214.200.94",
-  "http://data.kenecolor.com",
-  "http://spidercommunicationbd.com",
-  "http://bdix.hitechisp.com",
-  "http://www.tnetftp.com",
-  "http://greetingsonlinebd.com",
-  "http://103.133.175.242/80",
-  "http://mybdix.com",
-  "http://www.plus.net.bd",
-  "http://mars.bolbd.net",
-  "https://srnetworks.webs.com",
-  "https://srnetworks.webs.com/ftp-live-tv",
-  "https://mahirbd.com",
-  "https://mahirbd.com/media.php",
-  "http://103.29.127.14",
-  "http://media.zerointernet.net",
-  "http://103.96.36.115",
-  "http://www.freedomonlinebd.com",
-  "http://www.agcommunication.net",
-  "https://f4internetsolution.com",
-  "http://172.2.2.2:80",
-  "http://f4cineplex.myftp.org",
-  "https://speednetkhulna.com",
-  "http://speed4you.net",
-  "http://www.candybd.net",
-  "https://cnetworkbd.net",
-  "http://www.candybd.net",
-  "http://www.linkinnet.net",
-  "http://www.mycybernest.com",
-  "https://103.91.53.248",
-  "http://www.bograonlinebd.com",
-  "http://www.beeflix.biz",
-  "https://sites.google.com/view/amberitservers",
-  "https://rlcafenet.com",
-  "https://www.netinfobd.com",
-  "https://btekbd.com",
-  "http://www.a1cyberlinkbd.com",
-  "http://www.mariumnetwork.com",
-  "http://103.115.82.254",
-  "http://medialink24.net",
-  "http://timenai.com",
-  "https://www.bmnetworkbd.tk",
-  "http://www.smartnetltd.com",
-  "http://movie.smartnetltd.com",
-  "http://arishabd.net",
-  "http://10.10.10.10",
-  "https://rsnetbd.com",
-  "https://cueclub.com.bd",
-  "https://www.worldbd.net",
-  "http://portal.worldbd.net",
-  "http://172.102.0.3",
-  "https://www.4gnetworkbd.com",
-  "https://speedo.net.bd",
-  "https://iboxbd.club",
-  "http://103.135.208.2",
-  "http://iboxbd.online",
-  "http://172.20.0.19",
-  "http://172.20.0.20",
-  "http://diginetbd.net",
-  "http://avabdnet.com",
-  "http://ctgoz.com",
-  "http://172.30.2.14",
-  "http://www.adharalo.com",
-  "http://smiledotnet.xyz",
-  "http://www.rdconlinebd.net",
-  "https://presslinkbd.net",
-  "https://taltola.net",
-  "http://146.196.48.9",
-  "http://146.196.48.10",
-  "https://crazynetbd.com",
-  "http://www.ectlink.com",
-  "http://download.ectlink.com",
-  "https://ifra.network",
-  "http://103.110.126.146:8000",
-  "http://todayvisionbd.com",
-  "https://www.smiritycable.com",
-  "https://sardernet.com",
-  "https://ctgoz.com",
-  "http://www.avabdnet.com",
-  "http://www.friendsonlinebd.com",
-  "http://www.bhuiyan-online.com",
-  "http://rahulenterprise.net",
-  "http://103.86.200.7",
-  "http://103.251.247.147",
-  "http://103.85.197.10",
-  "http://103.56.6.6/Data",
-  "http://10.1.1.1",
-  "http://172.22.22.100",
-  "http://10.10.10.10:8080",
-  "https://genvideos.org"
-]
+{
+    "servers": [
+        {
+            "id": 1,
+            "name": "SAMONLINE FTP SERVER",
+            "addresses": [
+                "https://samftp.com",
+                "http://172.16.50.4",
+                "http://172.16.50.5"
+            ],
+            "type": "Movie"
+        },
+        {
+            "id": 2,
+            "name": "DISCOVERY FTP SERVER",
+            "addresses": [
+                "http://discoveryftp.net"
+            ],
+            "type": "Movie"
+        },
+        {
+            "id": 3,
+            "name": "WOW MOVIE ZONE FTP SERVER",
+            "addresses": [
+                "http://172.27.27.84"
+            ],
+            "type": "Movie"
+        },
+        {
+            "id": 4,
+            "name": "DHAKAMOVIE FTP SERVER",
+            "addresses": [
+                "http://dhakamovie.com"
+            ],
+            "type": "Movie"
+        },
+        {
+            "id": 5,
+            "name": "CTGMOVIES FTP SERVER",
+            "addresses": [
+                "http://ctgmovies.com",
+                "http://crazyctg.com"
+            ],
+            "type": "Movie"
+        },
+        {
+            "id": 6,
+            "name": "CINEBIOSCOPE FTP SERVER",
+            "addresses": [
+                "http://www.cinebioscope.com"
+            ],
+            "type": "Movie"
+        },
+        {
+            "id": 7,
+            "name": "MOVIEHAAT FTP SERVER",
+            "addresses": [
+                "http://moviehaat.net"
+            ],
+            "type": "Movie"
+        },
+        {
+            "id": 8,
+            "name": "MOVIEBOXBD FTP SERVER",
+            "addresses": [
+                "http://movieboxbd.com"
+            ],
+            "type": "Movie"
+        },
+        {
+            "id": 9,
+            "name": "MOVIEMELA FTP SERVER",
+            "addresses": [
+                "http://www.moviemela.live"
+            ],
+            "type": "Movie"
+        },
+        {
+            "id": 10,
+            "name": "MOVIECOUNTER FTP SERVER",
+            "addresses": [
+                "https://moviescounterhd.club"
+            ],
+            "type": "Movie"
+        },
+        {
+            "id": 11,
+            "name": "MOVIE HUB FTP SERVER",
+            "addresses": [
+                "http://203.83.177.225"
+            ],
+            "type": "Movie"
+        },
+        {
+            "id": 12,
+            "name": "MOVIEPOKA FTP SERVER",
+            "addresses": [
+                "http://103.214.200.94"
+            ],
+            "type": "Movie"
+        },
+        {
+            "id": 13,
+            "name": "MOVIEBAZER FTP SERVER",
+            "addresses": [
+                "http://mymoviebazar.com"
+            ],
+            "type": "Movie"
+        },
+        {
+            "id": 14,
+            "name": "MOVIEMELA FTP SERVER",
+            "addresses": [
+                "http://www.moviemela.live"
+            ],
+            "type": "Movie"
+        },
+        {
+            "id": 15,
+            "name": "MLWBD FTP SERVER",
+            "addresses": [
+                "https://mlwbd.pw"
+            ],
+            "type": "Movie"
+        },
+        {
+            "id": 16,
+            "name": "SHOWTIME FTP SERVER",
+            "addresses": [
+                "http://www.showtimebd.com"
+            ],
+            "type": "Movie"
+        },
+        {
+            "id": 17,
+            "name": "MOVIESERVER FTP SERVER",
+            "addresses": [
+                "http://www.movieserver.net"
+            ],
+            "type": "Movie"
+        },
+        {
+            "id": 18,
+            "name": "FNFOONLINE FTP SERVER",
+            "addresses": [
+                "http://movies.fnfonlinebd.com"
+            ],
+            "type": "TV"
+        },
+        {
+            "id": 19,
+            "name": "CTGSTREAM FTP SERVER",
+            "addresses": [
+                "http://www.ctgstream.com"
+            ],
+            "type": "TV"
+        },
+        {
+            "id": 20,
+            "name": "RANGDHANU LIVE FTP SERVER",
+            "addresses": [
+                "https://www.rangdhanu.live",
+                "http://fs.rangdhanu.live",
+                "http://emby.rangdhanu.live"
+            ],
+            "type": "TV"
+        },
+        {
+            "id": 21,
+            "name": "GENVIDEOS FTP SERVER",
+            "addresses": [
+                "https://genvideos.org"
+            ],
+            "type": "TV"
+        },
+        {
+            "id": 22,
+            "name": "SEBAIT FTP SERVER",
+            "addresses": [
+                "http://103.195.1.50"
+            ],
+            "type": "TV"
+        },
+        {
+            "id": 23,
+            "name": "BUSINESS NETWORK (B.NET) FTP SERVER",
+            "addresses": [
+                "http://ftpbd.net",
+                "http://103.58.73.9",
+                "http://media.ftpbd.net",
+                "http://server1.ftpbd.net",
+                "http://server4.ftpbd.net"
+            ],
+            "type": "General FTP/File Sharing"
+        },
+        {
+            "id": 24,
+            "name": "EBOX FTP SERVER",
+            "addresses": [
+                "http://fs.ebox.live",
+                "http://103.49.168.107",
+                "http://fileserver.ebox.live"
+            ],
+            "type": "General FTP/File Sharing"
+        },
+        {
+            "id": 25,
+            "name": "BDSPEED FTP SERVER",
+            "addresses": [
+                "http://www.bdspeed.com"
+            ],
+            "type": "General FTP/File Sharing"
+        },
+        {
+            "id": 26,
+            "name": "DNETBD FTP SERVER",
+            "addresses": [
+                "http://103.76.196.90",
+                "https://dnetdrive.com"
+            ],
+            "type": "General FTP/File Sharing"
+        },
+        {
+            "id": 27,
+            "name": "BDLAN FTP SERVER",
+            "addresses": [
+                "http://www.bdlan.net"
+            ],
+            "type": "General FTP/File Sharing"
+        },
+        {
+            "id": 28,
+            "name": "BDPLEX FTP SERVER",
+            "addresses": [
+                "http://bdplex.net"
+            ],
+            "type": "General FTP/File Sharing"
+        },
+        {
+            "id": 29,
+            "name": "INFOLINK FTP SERVER",
+            "addresses": [
+                "https://infolinkbd.com"
+            ],
+            "type": "General FTP/File Sharing"
+        },
+        {
+            "id": 30,
+            "name": "TIMEPASSBD FTP SERVER",
+            "addresses": [
+                "http://103.200.36.242",
+                "http://www.timepassbd.live",
+                "http://ftp.timepassbd.live"
+            ],
+            "type": "General FTP/File Sharing"
+        },
+        {
+            "id": 31,
+            "name": "SUPERNET FTP SERVER",
+            "addresses": [
+                "http://supernetsenbag.com"
+            ],
+            "type": "General FTP/File Sharing"
+        },
+        {
+            "id": 32,
+            "name": "DREAMNETBD FTP SERVER",
+            "addresses": [
+                "https://dreamnetbd.com",
+                "http://bddreamnet.blogspot.com"
+            ],
+            "type": "General FTP/File Sharing"
+        },
+        {
+            "id": 33,
+            "name": "ICC COMMUNICATION FTP SERVER",
+            "addresses": [
+                "http://10.16.100.244"
+            ],
+            "type": "ISP/Network/Broadband"
+        },
+        {
+            "id": 34,
+            "name": "CITY CLOUD BD FTP SERVER",
+            "addresses": [
+                "http://103.102.253.250"
+            ],
+            "type": "ISP/Network/Broadband"
+        },
+        {
+            "id": 35,
+            "name": "LINK3 INTERNET FTP SERVER",
+            "addresses": [
+                "http://www.cinehub24.com"
+            ],
+            "type": "ISP/Network/Broadband"
+        },
+        {
+            "id": 36,
+            "name": "NETATHOMEBD FTP SERVER",
+            "addresses": [
+                "https://www.netathomebd.com"
+            ],
+            "type": "ISP/Network/Broadband"
+        },
+        {
+            "id": 37,
+            "name": "SKYNET FTP SERVER",
+            "addresses": [
+                "http://skynet.com.bd/ftp"
+            ],
+            "type": "ISP/Network/Broadband"
+        },
+        {
+            "id": 38,
+            "name": "SKYNETONLINE FTP SERVER",
+            "addresses": [
+                "https://skynetonlinebd.net"
+            ],
+            "type": "ISP/Network/Broadband"
+        },
+        {
+            "id": 39,
+            "name": "SKYNETBD FTP SERVER",
+            "addresses": [
+                "https://www.skynetbd.net"
+            ],
+            "type": "ISP/Network/Broadband"
+        },
+        {
+            "id": 40,
+            "name": "BEEFLIX FTP SERVER",
+            "addresses": [
+                "http://www.beeflix.biz"
+            ],
+            "type": "ISP/Network/Broadband"
+        },
+        {
+            "id": 41,
+            "name": "CNETWORK FTP SERVER",
+            "addresses": [
+                "https://cnetworkbd.net"
+            ],
+            "type": "ISP/Network/Broadband"
+        },
+        {
+            "id": 42,
+            "name": "IHUB FTP SERVER",
+            "addresses": [
+                "http://ihub.live"
+            ],
+            "type": "ISP/Network/Broadband"
+        },
+        {
+            "id": 43,
+            "name": "POLLYFLIX & AMRBD FTP SERVER",
+            "addresses": [
+                "http://pollyflix.com",
+                "http://fs.amrbd.com",
+                "http://fs2.amrbd.com"
+            ],
+            "type": "Mixed"
+        },
+        {
+            "id": 44,
+            "name": "CIRCLE NET FTP SERVER",
+            "addresses": [
+                "http://circleftp.net",
+                "http://ftp2.circleftp.net",
+                "http://hd.circleftp.net",
+                "http://15.1.1.1"
+            ],
+            "type": "Mixed"
+        },
+        {
+            "id": 45,
+            "name": "ASIAN NET FTP SERVER",
+            "addresses": [
+                "http://asianftp.com"
+            ],
+            "type": "Mixed"
+        },
+        {
+            "id": 46,
+            "name": "QUICKONLINE FTP SERVER",
+            "addresses": [
+                "http://quickonlineftp.com"
+            ],
+            "type": "Mixed"
+        },
+        {
+            "id": 47,
+            "name": "ALPHAMEDIAZONE FTP SERVER",
+            "addresses": [
+                "http://www.alphabroadway.com",
+                "http://ftp.alphamediazone.com"
+            ],
+            "type": "Mixed"
+        },
+        {
+            "id": 48,
+            "name": "SPARKNET FTP SERVER",
+            "addresses": [
+                "https://sparknetbd.com"
+            ],
+            "type": "Mixed"
+        },
+        {
+            "id": 49,
+            "name": "MIDIPLEX FTP SERVER",
+            "addresses": [
+                "http://midiplex.net",
+                "http://cdn.midiplex.net"
+            ],
+            "type": "Mixed"
+        },
+        {
+            "id": 50,
+            "name": "FOCUSONLINE FTP SERVER",
+            "addresses": [],
+            "type": "Mixed"
+        },
+        {
+            "id": 51,
+            "name": "BOSSBD FTP SERVER",
+            "addresses": [
+                "http://www.bossbd.net",
+                "http://bossbd.live",
+                "http://cdn.bossbd.net",
+                "http://cdn1.bossbd.net",
+                "http://cdn2.bossbd.net"
+            ],
+            "type": "Mixed"
+        }
+    ]
+}
