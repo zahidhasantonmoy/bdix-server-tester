@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiWifi, FiWifiOff, FiLoader, FiRefreshCw, FiServer, FiCheckCircle, FiXCircle, FiClock, FiSearch } from 'react-icons/fi';
+import { FiWifi, FiWifiOff, FiLoader, FiRefreshCw, FiServer, FiCheckCircle, FiXCircle, FiClock, FiSearch, FiFacebook, FiLinkedin, FiGithub, FiGlobe } from 'react-icons/fi';
 import { bdixServers } from './data/servers';
 
 export default function Home() {
@@ -62,10 +62,6 @@ export default function Home() {
     
     setIsLoading(false);
   }, [checkServer]);
-
-  useEffect(() => {
-    checkAllServers();
-  }, [checkAllServers]);
 
   const toggleServerExpansion = (serverName) => {
     setExpandedServers(prev => ({
@@ -428,13 +424,59 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="bg-gray-800 text-white py-8">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-gray-400">
-            BDIX Connectivity Tester &copy; {new Date().getFullYear()} - Test your BDIX server connectivity
-          </p>
-          <p className="text-gray-500 text-sm mt-2">
-            This tool helps you check the connectivity status of BDIX servers in Bangladesh
-          </p>
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="text-center md:text-left">
+              <p className="text-gray-400">
+                BDIX Connectivity Tester &copy; {new Date().getFullYear()} - Test your BDIX server connectivity
+              </p>
+              <p className="text-gray-500 text-sm mt-2">
+                This tool helps you check the connectivity status of BDIX servers in Bangladesh
+              </p>
+            </div>
+            
+            <div className="flex flex-col items-center md:items-end">
+              <p className="text-gray-400 text-sm">Developed by Zahid Hasan Tonmoy</p>
+              <div className="flex gap-4 mt-2">
+                <a 
+                  href="https://www.facebook.com/zahidhasantonmoybd" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                  aria-label="Facebook"
+                >
+                  <FiFacebook className="text-xl" />
+                </a>
+                <a 
+                  href="https://www.linkedin.com/in/zahidhasantonmoy/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                  aria-label="LinkedIn"
+                >
+                  <FiLinkedin className="text-xl" />
+                </a>
+                <a 
+                  href="https://github.com/zahidhasantonmoy" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                  aria-label="GitHub"
+                >
+                  <FiGithub className="text-xl" />
+                </a>
+                <a 
+                  href="https://zahidhasantonmoy.vercel.app" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                  aria-label="Portfolio"
+                >
+                  <FiGlobe className="text-xl" />
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
