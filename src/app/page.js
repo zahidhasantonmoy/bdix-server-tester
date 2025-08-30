@@ -15,8 +15,6 @@ export default function Home() {
 
   const checkServer = useCallback((url) => {
     return new Promise((resolve) => {
-      console.log(`Testing URL: ${url}`);
-      
       // Normalize URL
       let testUrl = url;
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
@@ -26,7 +24,6 @@ export default function Home() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => {
         controller.abort();
-        console.log(`Timeout for: ${testUrl}`);
         resolve('Offline');
       }, 2000);
       
@@ -37,12 +34,14 @@ export default function Home() {
       })
       .then(response => {
         clearTimeout(timeoutId);
-        console.log(`Success for: ${testUrl}`, response);
+        // IMPORTANT: With no-cors mode, we can't read the status,
+        // but if we get here at all, it means we could connect to the server
+        // This is the key insight for BDIX testing!
         resolve('Online');
       })
       .catch(error => {
         clearTimeout(timeoutId);
-        console.log(`Error for: ${testUrl}`, error);
+        // Only network errors (no connection at all) will trigger this
         resolve('Offline');
       });
     });
