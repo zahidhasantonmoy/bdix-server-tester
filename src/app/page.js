@@ -21,48 +21,27 @@ export default function Home() {
         testUrl = `http://${testUrl}`;
       }
       
-      // Remove trailing slash if present
-      if (testUrl.endsWith('/')) {
-        testUrl = testUrl.slice(0, -1);
-      }
+      // Simple, direct approach
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+        resolve('Offline');
+      }, 2000);
       
-      // Test multiple common paths
-      const pathsToTest = ['', '/favicon.ico', '/index.html'];
-      let testedPaths = 0;
-      
-      const testNextPath = () => {
-        if (testedPaths >= pathsToTest.length) {
-          resolve('Offline');
-          return;
-        }
-        
-        const path = pathsToTest[testedPaths];
-        const fullPath = path ? `${testUrl}${path}` : testUrl;
-        testedPaths++;
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => {
-          controller.abort();
-          testNextPath();
-        }, 1500);
-        
-        fetch(fullPath, {
-          method: 'HEAD',
-          mode: 'no-cors',
-          signal: controller.signal,
-          redirect: 'follow'
-        })
-        .then(() => {
-          clearTimeout(timeoutId);
-          resolve('Online');
-        })
-        .catch(() => {
-          clearTimeout(timeoutId);
-          testNextPath();
-        });
-      };
-      
-      testNextPath();
+      fetch(testUrl, {
+        method: 'GET',
+        mode: 'no-cors',
+        signal: controller.signal,
+        redirect: 'follow'
+      })
+      .then(() => {
+        clearTimeout(timeoutId);
+        resolve('Online');
+      })
+      .catch(() => {
+        clearTimeout(timeoutId);
+        resolve('Offline');
+      });
     });
   }, []);
 
