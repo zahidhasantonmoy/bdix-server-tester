@@ -21,40 +21,34 @@ export default function Home() {
         testUrl = `http://${url}`;
       }
       
-      // For BDIX servers, we often need to test specific paths
-      // Try the root path first
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      // For BDIX testing, we just need to see if we can make a connection
+      // The key is that we're doing this from the CLIENT, not the server
       
-      fetch(testUrl, {
-        method: 'GET',
-        mode: 'no-cors',
-        signal: controller.signal
-      })
-      .then(() => {
-        clearTimeout(timeoutId);
+      // Simple test - try to fetch the URL
+      const img = new Image();
+      const timeout = setTimeout(() => {
+        resolve('Offline');
+      }, 2000);
+      
+      img.onload = () => {
+        clearTimeout(timeout);
         resolve('Online');
-      })
-      .catch(() => {
-        clearTimeout(timeoutId);
-        // Try with a simple resource like favicon
-        const controller2 = new AbortController();
-        const timeoutId2 = setTimeout(() => controller2.abort(), 3000);
-        
-        fetch(`${testUrl}/favicon.ico`, {
-          method: 'GET',
-          mode: 'no-cors',
-          signal: controller2.signal
-        })
-        .then(() => {
-          clearTimeout(timeoutId2);
-          resolve('Online');
-        })
-        .catch(() => {
-          clearTimeout(timeoutId2);
-          resolve('Offline');
-        });
-      });
+      };
+      
+      img.onerror = () => {
+        clearTimeout(timeout);
+        resolve('Offline');
+      };
+      
+      // Try to load the URL - this happens from the client's browser
+      try {
+        // Add cache busting to ensure we're making a fresh request
+        const timestamp = Date.now();
+        img.src = `${testUrl}/?t=${timestamp}`;
+      } catch (e) {
+        clearTimeout(timeout);
+        resolve('Offline');
+      }
     });
   }, []);
 
