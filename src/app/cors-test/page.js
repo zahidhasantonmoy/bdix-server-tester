@@ -156,7 +156,7 @@ export default function CorsBypassTest() {
           <li>10.16.100.244 (ICC COMMUNICATION)</li>
           <li>103.58.73.9 (BUSINESS NETWORK)</li>
         </ul>
-        <p><strong>Tip:</strong> "Accessible" means the server responded (good for BDIX). "Not Accessible" means no response.</p>
+        <p><strong>Tip:</strong> &quot;Accessible&quot; means the server responded (good for BDIX). &quot;Not Accessible&quot; means no response.</p>
       </div>
     </div>
   );
