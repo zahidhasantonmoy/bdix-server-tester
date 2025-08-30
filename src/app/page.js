@@ -15,57 +15,10 @@ export default function Home() {
 
   const checkServer = useCallback((url) => {
     return new Promise((resolve) => {
-      // Normalize URL - ensure it has protocol
-      let testUrl = url;
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        testUrl = `http://${url}`;
-      }
-      
-      // Remove trailing slash if present
-      if (testUrl.endsWith('/')) {
-        testUrl = testUrl.slice(0, -1);
-      }
-      
-      // For BDIX testing from browser, we need to be very direct
-      const xhr = new XMLHttpRequest();
-      
-      // Set up timeout
-      const timeout = setTimeout(() => {
-        xhr.abort();
-        resolve('Offline');
-      }, 2500);
-      
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-          clearTimeout(timeout);
-          // For BDIX, ANY response means accessible
-          // This includes 404s, 403s, etc. - what matters is that we got a response
-          if (xhr.status > 0) {
-            resolve('Online');
-          } else {
-            resolve('Offline');
-          }
-        }
-      };
-      
-      xhr.onerror = function() {
-        clearTimeout(timeout);
-        resolve('Offline');
-      };
-      
-      xhr.ontimeout = function() {
-        resolve('Offline');
-      };
-      
-      try {
-        // Use GET request to the root path
-        xhr.open('GET', testUrl, true);
-        xhr.timeout = 2500;
-        xhr.send();
-      } catch (e) {
-        clearTimeout(timeout);
-        resolve('Offline');
-      }
+      // Super simple approach - just try to connect
+      fetch(url, { mode: 'no-cors' })
+        .then(() => resolve('Online'))
+        .catch(() => resolve('Offline'));
     });
   }, []);
 
