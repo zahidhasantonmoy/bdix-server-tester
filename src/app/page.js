@@ -13,46 +13,47 @@ export default function Home() {
   const [filter, setFilter] = useState('all'); // all, online, offline
   const [expandedServers, setExpandedServers] = useState({});
 
-  const checkServer = useCallback(async (server, url) => {
+  const checkServer = useCallback((url) => {
     return new Promise((resolve) => {
-      // Create an image element to test connectivity
-      // This approach works better for BDIX testing as it bypasses some CORS limitations
-      const img = new Image();
+      // Create a new XMLHttpRequest
+      const xhr = new XMLHttpRequest();
       
-      // Set a timeout for the test
+      // Set up a timeout
       const timeout = setTimeout(() => {
-        img.src = ''; // Cancel the request
+        xhr.abort();
         resolve('Timeout');
-      }, 5000);
+      }, 3000); // 3 second timeout for BDIX testing
       
-      // If the image loads, the server is accessible
-      img.onload = () => {
-        clearTimeout(timeout);
-        resolve('Online');
+      // Handle successful response
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          clearTimeout(timeout);
+          // For BDIX servers, any response (even 403, 404) indicates connectivity
+          // Only network errors or timeouts mean the server is inaccessible
+          if (xhr.status > 0) {
+            resolve('Online');
+          } else {
+            resolve('Offline');
+          }
+        }
       };
       
-      // If there's an error, the server is not accessible
-      img.onerror = () => {
+      // Handle network errors
+      xhr.onerror = function() {
         clearTimeout(timeout);
         resolve('Offline');
       };
       
-      // Try to load a favicon or a simple resource from the server
-      // This works for both IP addresses and domain names
+      xhr.ontimeout = function() {
+        resolve('Timeout');
+      };
+      
       try {
-        // For BDIX testing, we try to access a common resource
-        // We use a simple approach that works better with local network testing
-        if (url.endsWith('/')) {
-          img.src = `${url}favicon.ico`;
-        } else if (url.includes('://')) {
-          // Add a simple path to test
-          img.src = `${url}/favicon.ico`;
-        } else {
-          // Handle cases where URL might not be properly formatted
-          img.src = `http://${url}/favicon.ico`;
-        }
-      } catch (e) {
-        // If there's an error creating the URL, mark as offline
+        // Use HEAD request to minimize data transfer
+        xhr.open('HEAD', url, true);
+        xhr.timeout = 3000;
+        xhr.send();
+      } catch (error) {
         clearTimeout(timeout);
         resolve('Offline');
       }
@@ -90,7 +91,7 @@ export default function Home() {
     for (let i = 0; i < urlsToTest.length; i += concurrencyLimit) {
       const chunk = urlsToTest.slice(i, i + concurrencyLimit);
       const chunkPromises = chunk.map(item => 
-        checkServer(item.server, item.url).then(status => ({
+        checkServer(item.url).then(status => ({
           serverName: item.serverName,
           urlIndex: item.urlIndex,
           status
