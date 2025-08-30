@@ -15,36 +15,53 @@ export default function Home() {
 
   const checkServer = useCallback((url) => {
     return new Promise((resolve) => {
-      // Normalize URL
+      // Normalize URL - ensure it has protocol
       let testUrl = url;
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
         testUrl = `http://${url}`;
       }
       
-      // For BDIX testing, we just need to see if we can make a connection
-      // The key is that we're doing this from the CLIENT, not the server
+      // Remove trailing slash if present
+      if (testUrl.endsWith('/')) {
+        testUrl = testUrl.slice(0, -1);
+      }
       
-      // Simple test - try to fetch the URL
-      const img = new Image();
+      // For BDIX testing from browser, we need to be very direct
+      const xhr = new XMLHttpRequest();
+      
+      // Set up timeout
       const timeout = setTimeout(() => {
+        xhr.abort();
         resolve('Offline');
-      }, 2000);
+      }, 2500);
       
-      img.onload = () => {
-        clearTimeout(timeout);
-        resolve('Online');
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+          clearTimeout(timeout);
+          // For BDIX, ANY response means accessible
+          // This includes 404s, 403s, etc. - what matters is that we got a response
+          if (xhr.status > 0) {
+            resolve('Online');
+          } else {
+            resolve('Offline');
+          }
+        }
       };
       
-      img.onerror = () => {
+      xhr.onerror = function() {
         clearTimeout(timeout);
         resolve('Offline');
       };
       
-      // Try to load the URL - this happens from the client's browser
+      xhr.ontimeout = function() {
+        resolve('Offline');
+      };
+      
       try {
-        // Add cache busting to ensure we're making a fresh request
-        const timestamp = Date.now();
-        img.src = `${testUrl}/?t=${timestamp}`;
+        // Use GET request to the root path
+        xhr.open('GET', testUrl, true);
+        xhr.timeout = 2500;
+        xhr.send();
       } catch (e) {
         clearTimeout(timeout);
         resolve('Offline');
