@@ -15,17 +15,38 @@ export default function Home() {
 
   const checkServer = useCallback(async (server, url) => {
     try {
+      // For BDIX testing, we need to check different types of URLs
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
       
-      await fetch(url, { 
-        mode: 'no-cors', 
-        signal: controller.signal 
-      });
-      
-      clearTimeout(timeoutId);
-      return 'Online';
+      // If it's an IP address, we can try a more direct approach
+      if (url.startsWith('http://') && (url.match(/\d+\.\d+\.\d+\.\d+/) || url.includes('172.') || url.includes('10.') || url.includes('192.168.'))) {
+        // For IP-based URLs, try to fetch a simple resource
+        const response = await fetch(url, { 
+          method: 'HEAD', // Use HEAD request to minimize data transfer
+          mode: 'no-cors',
+          signal: controller.signal,
+          redirect: 'follow'
+        });
+        
+        clearTimeout(timeoutId);
+        // For BDIX, if we get any response (even with no-cors), it likely means accessible
+        return 'Online';
+      } else {
+        // For domain-based URLs, use a simple fetch
+        await fetch(url, { 
+          mode: 'no-cors', 
+          signal: controller.signal 
+        });
+        
+        clearTimeout(timeoutId);
+        return 'Online';
+      }
     } catch (error) {
+      // Check if it's a timeout or actual network error
+      if (error.name === 'AbortError') {
+        return 'Timeout';
+      }
       return 'Offline';
     }
   }, []);
@@ -45,19 +66,46 @@ export default function Home() {
     });
     setServerStatus(initialStatus);
     
-    // Check each server URL
-    let checkedUrls = 0;
-    for (const server of bdixServers) {
-      for (let i = 0; i < server.urls.length; i++) {
-        const status = await checkServer(server, server.urls[i]);
-        setServerStatus(prevStatus => ({
-          ...prevStatus,
-          [`${server.name}-${i}`]: status
-        }));
-        
-        checkedUrls++;
-        setProgress(Math.round((checkedUrls / totalUrls) * 100));
-      }
+    // Create a flat list of all URLs to test
+    const urlsToTest = [];
+    bdixServers.forEach(server => {
+      server.urls.forEach((url, urlIndex) => {
+        urlsToTest.push({ server, url, serverName: server.name, urlIndex });
+      });
+    });
+    
+    // Process URLs with concurrency limit to avoid overwhelming the browser
+    const concurrencyLimit = 10; // Test 10 URLs simultaneously
+    let completedUrls = 0;
+    
+    // Process URLs in chunks
+    for (let i = 0; i < urlsToTest.length; i += concurrencyLimit) {
+      const chunk = urlsToTest.slice(i, i + concurrencyLimit);
+      const chunkPromises = chunk.map(item => 
+        checkServer(item.server, item.url).then(status => ({
+          serverName: item.serverName,
+          urlIndex: item.urlIndex,
+          status
+        }))
+      );
+      
+      // Wait for all promises in this chunk to complete
+      const chunkResults = await Promise.all(chunkPromises);
+      
+      // Update status for completed URLs
+      const updatedStatus = {};
+      chunkResults.forEach(result => {
+        updatedStatus[`${result.serverName}-${result.urlIndex}`] = result.status;
+      });
+      
+      setServerStatus(prevStatus => ({
+        ...prevStatus,
+        ...updatedStatus
+      }));
+      
+      // Update progress
+      completedUrls += chunkResults.length;
+      setProgress(Math.round((completedUrls / totalUrls) * 100));
     }
     
     setIsLoading(false);
