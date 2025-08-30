@@ -15,116 +15,55 @@ export default function Home() {
 
   const checkServer = useCallback((url) => {
     return new Promise((resolve) => {
-      // Add some debugging
-      console.log(`Testing server: ${url}`);
+      // For BDIX testing, we need a more direct approach
+      // Let's try to ping the server directly
       
-      // Method 1: Try XMLHttpRequest with HEAD request
-      const xhr = new XMLHttpRequest();
-      let method1Done = false;
+      // First, try a simple fetch with no-cors but handle it properly
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
       
-      const timeout = setTimeout(() => {
-        if (!method1Done) {
-          method1Done = true;
-          xhr.abort();
-          console.log(`XHR timeout for: ${url}`);
-          // If first method times out, try image-based approach
-          tryImageMethod();
-        }
-      }, 2000);
-      
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4 && !method1Done) {
-          method1Done = true;
-          clearTimeout(timeout);
-          console.log(`XHR response for ${url}: status ${xhr.status}`);
-          // For BDIX, any response means accessible (even 404, 403)
-          if (xhr.status > 0) {
-            console.log(`Server ${url} is Online via XHR`);
-            resolve('Online');
-          } else {
-            console.log(`Server ${url} XHR failed, trying image method`);
-            // Try image method as fallback
-            tryImageMethod();
-          }
-        }
-      };
-      
-      xhr.onerror = function() {
-        if (!method1Done) {
-          method1Done = true;
-          clearTimeout(timeout);
-          console.log(`XHR error for: ${url}`);
-          // Try image method as fallback
-          tryImageMethod();
-        }
-      };
-      
-      try {
-        xhr.open('HEAD', url, true);
-        xhr.timeout = 2000;
-        xhr.send();
-      } catch (error) {
-        if (!method1Done) {
-          method1Done = true;
-          clearTimeout(timeout);
-          console.log(`XHR exception for ${url}: ${error.message}`);
-          tryImageMethod();
-        }
-      }
-      
-      // Method 2: Image-based testing (fallback)
-      function tryImageMethod() {
-        console.log(`Trying image method for: ${url}`);
-        const img = new Image();
-        let method2Done = false;
+      fetch(url, {
+        method: 'HEAD',
+        mode: 'no-cors',
+        signal: controller.signal
+      })
+      .then(response => {
+        clearTimeout(timeoutId);
+        // With no-cors, we can't read the status, but if we get here, there's connectivity
+        console.log(`Fetch successful for ${url}`);
+        resolve('Online');
+      })
+      .catch(error => {
+        clearTimeout(timeoutId);
+        console.log(`Fetch failed for ${url}: ${error.message}`);
         
+        // Try image method as fallback
+        const img = new Image();
         const imgTimeout = setTimeout(() => {
-          if (!method2Done) {
-            method2Done = true;
-            console.log(`Image method timeout for: ${url}`);
-            resolve('Offline');
-          }
-        }, 2000);
+          console.log(`Image timeout for ${url}`);
+          resolve('Offline');
+        }, 3000);
         
         img.onload = function() {
-          if (!method2Done) {
-            method2Done = true;
-            clearTimeout(imgTimeout);
-            console.log(`Server ${url} is Online via Image`);
-            resolve('Online');
-          }
+          clearTimeout(imgTimeout);
+          console.log(`Image load successful for ${url}`);
+          resolve('Online');
         };
         
         img.onerror = function() {
-          if (!method2Done) {
-            method2Done = true;
-            clearTimeout(imgTimeout);
-            console.log(`Server ${url} is Offline via Image`);
-            resolve('Offline');
-          }
+          clearTimeout(imgTimeout);
+          console.log(`Image load failed for ${url}`);
+          resolve('Offline');
         };
         
-        // Try to load favicon or root path
         try {
-          let testUrl;
-          if (url.endsWith('/')) {
-            testUrl = `${url}favicon.ico`;
-          } else if (url.includes('://')) {
-            testUrl = `${url}/favicon.ico`;
-          } else {
-            testUrl = `http://${url}/favicon.ico`;
-          }
-          console.log(`Image test URL: ${testUrl}`);
-          img.src = testUrl;
-        } catch (imgError) {
-          if (!method2Done) {
-            method2Done = true;
-            clearTimeout(imgTimeout);
-            console.log(`Image exception for ${url}: ${imgError.message}`);
-            resolve('Offline');
-          }
+          img.src = `${url}/favicon.ico`;
+        } catch (e) {
+          clearTimeout(imgTimeout);
+          console.log(`Image exception for ${url}: ${e.message}`);
+          resolve('Offline');
         }
-      }
+      });
     });
   }, []);
 
