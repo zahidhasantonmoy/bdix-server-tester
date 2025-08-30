@@ -15,47 +15,115 @@ export default function Home() {
 
   const checkServer = useCallback((url) => {
     return new Promise((resolve) => {
-      // Create a new XMLHttpRequest
+      // Add some debugging
+      console.log(`Testing server: ${url}`);
+      
+      // Method 1: Try XMLHttpRequest with HEAD request
       const xhr = new XMLHttpRequest();
+      let method1Done = false;
       
-      // Set up a timeout
       const timeout = setTimeout(() => {
-        xhr.abort();
-        resolve('Timeout');
-      }, 3000); // 3 second timeout for BDIX testing
+        if (!method1Done) {
+          method1Done = true;
+          xhr.abort();
+          console.log(`XHR timeout for: ${url}`);
+          // If first method times out, try image-based approach
+          tryImageMethod();
+        }
+      }, 2000);
       
-      // Handle successful response
       xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
+        if (xhr.readyState === 4 && !method1Done) {
+          method1Done = true;
           clearTimeout(timeout);
-          // For BDIX servers, any response (even 403, 404) indicates connectivity
-          // Only network errors or timeouts mean the server is inaccessible
+          console.log(`XHR response for ${url}: status ${xhr.status}`);
+          // For BDIX, any response means accessible (even 404, 403)
           if (xhr.status > 0) {
+            console.log(`Server ${url} is Online via XHR`);
             resolve('Online');
           } else {
-            resolve('Offline');
+            console.log(`Server ${url} XHR failed, trying image method`);
+            // Try image method as fallback
+            tryImageMethod();
           }
         }
       };
       
-      // Handle network errors
       xhr.onerror = function() {
-        clearTimeout(timeout);
-        resolve('Offline');
-      };
-      
-      xhr.ontimeout = function() {
-        resolve('Timeout');
+        if (!method1Done) {
+          method1Done = true;
+          clearTimeout(timeout);
+          console.log(`XHR error for: ${url}`);
+          // Try image method as fallback
+          tryImageMethod();
+        }
       };
       
       try {
-        // Use HEAD request to minimize data transfer
         xhr.open('HEAD', url, true);
-        xhr.timeout = 3000;
+        xhr.timeout = 2000;
         xhr.send();
       } catch (error) {
-        clearTimeout(timeout);
-        resolve('Offline');
+        if (!method1Done) {
+          method1Done = true;
+          clearTimeout(timeout);
+          console.log(`XHR exception for ${url}: ${error.message}`);
+          tryImageMethod();
+        }
+      }
+      
+      // Method 2: Image-based testing (fallback)
+      function tryImageMethod() {
+        console.log(`Trying image method for: ${url}`);
+        const img = new Image();
+        let method2Done = false;
+        
+        const imgTimeout = setTimeout(() => {
+          if (!method2Done) {
+            method2Done = true;
+            console.log(`Image method timeout for: ${url}`);
+            resolve('Offline');
+          }
+        }, 2000);
+        
+        img.onload = function() {
+          if (!method2Done) {
+            method2Done = true;
+            clearTimeout(imgTimeout);
+            console.log(`Server ${url} is Online via Image`);
+            resolve('Online');
+          }
+        };
+        
+        img.onerror = function() {
+          if (!method2Done) {
+            method2Done = true;
+            clearTimeout(imgTimeout);
+            console.log(`Server ${url} is Offline via Image`);
+            resolve('Offline');
+          }
+        };
+        
+        // Try to load favicon or root path
+        try {
+          let testUrl;
+          if (url.endsWith('/')) {
+            testUrl = `${url}favicon.ico`;
+          } else if (url.includes('://')) {
+            testUrl = `${url}/favicon.ico`;
+          } else {
+            testUrl = `http://${url}/favicon.ico`;
+          }
+          console.log(`Image test URL: ${testUrl}`);
+          img.src = testUrl;
+        } catch (imgError) {
+          if (!method2Done) {
+            method2Done = true;
+            clearTimeout(imgTimeout);
+            console.log(`Image exception for ${url}: ${imgError.message}`);
+            resolve('Offline');
+          }
+        }
       }
     });
   }, []);
