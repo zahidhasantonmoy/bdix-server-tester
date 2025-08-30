@@ -15,10 +15,58 @@ export default function Home() {
 
   const checkServer = useCallback((url) => {
     return new Promise((resolve) => {
-      // Super simple approach - just try to connect
-      fetch(url, { mode: 'no-cors' })
-        .then(() => resolve('Online'))
-        .catch(() => resolve('Offline'));
+      // For BDIX testing, we need to handle different types of URLs appropriately
+      
+      // First, normalize the URL
+      let testUrl = url;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        testUrl = `http://${url}`;
+      }
+      
+      // For BDIX servers, we often need to test with a timeout and specific approach
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+        resolve('Offline');
+      }, 2000); // 2 second timeout for local network
+      
+      // Try a simple fetch first
+      fetch(testUrl, {
+        method: 'GET',
+        mode: 'no-cors',
+        signal: controller.signal,
+        redirect: 'follow'
+      })
+      .then(response => {
+        clearTimeout(timeoutId);
+        // For BDIX, if we get any response, the server is accessible
+        // This includes 404s, 403s, etc.
+        resolve('Online');
+      })
+      .catch(error => {
+        clearTimeout(timeoutId);
+        // If the first attempt fails, try a different approach
+        // Some BDIX servers might respond better to HEAD requests
+        const controller2 = new AbortController();
+        const timeoutId2 = setTimeout(() => {
+          controller2.abort();
+          resolve('Offline');
+        }, 2000);
+        
+        fetch(testUrl, {
+          method: 'HEAD',
+          mode: 'no-cors',
+          signal: controller2.signal
+        })
+        .then(() => {
+          clearTimeout(timeoutId2);
+          resolve('Online');
+        })
+        .catch(() => {
+          clearTimeout(timeoutId2);
+          resolve('Offline');
+        });
+      });
     });
   }, []);
 
