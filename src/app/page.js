@@ -15,36 +15,26 @@ export default function Home() {
 
   const checkServer = useCallback((url) => {
     return new Promise((resolve) => {
-      // Very simple approach - try to connect to the server
-      // This is the most direct way to test BDIX connectivity
-      
-      // Create an image element to test connectivity
-      const img = document.createElement('img');
-      
-      // Set up timeout
-      const timeout = setTimeout(() => {
-        resolve('Offline');
-      }, 2500);
-      
-      // If image loads, server is accessible
-      img.onload = function() {
-        clearTimeout(timeout);
-        resolve('Online');
-      };
-      
-      // If image fails to load, server is not accessible
-      img.onerror = function() {
-        clearTimeout(timeout);
-        resolve('Offline');
-      };
-      
-      try {
-        // Try to load favicon - this forces a connection to the server
-        img.src = `${url}/favicon.ico`;
-      } catch (e) {
-        clearTimeout(timeout);
-        resolve('Offline');
+      // Normalize URL
+      let testUrl = url;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        testUrl = `http://${url}`;
       }
+      
+      // Very simple fetch - just test if we can connect
+      fetch(testUrl, { 
+        method: 'HEAD',
+        mode: 'no-cors',
+        redirect: 'follow'
+      })
+      .then(() => {
+        // If we get here, we could connect (even with CORS restrictions)
+        resolve('Online');
+      })
+      .catch(() => {
+        // If we get here, we couldn't connect at all
+        resolve('Offline');
+      });
     });
   }, []);
 
