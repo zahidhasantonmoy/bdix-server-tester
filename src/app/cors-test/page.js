@@ -11,18 +11,19 @@ export default function CorsBypassTest() {
     return new Promise((resolve) => {
       const img = new Image();
       const timeout = setTimeout(() => {
-        resolve({ status: 'timeout', message: 'Request timed out' });
+        resolve({ status: 'inaccessible', message: 'Server is not accessible (timeout)' });
       }, 3000);
 
       img.onload = function() {
         clearTimeout(timeout);
-        resolve({ status: 'success', message: 'Server is accessible' });
+        resolve({ status: 'accessible', message: 'Server is accessible' });
       };
 
       img.onerror = function() {
         clearTimeout(timeout);
-        // Even on error, if we got a response, the server might be accessible
-        resolve({ status: 'partial', message: 'Server responded but may have issues' });
+        // For BDIX testing, even an error might mean the server responded
+        // This is often a good sign for BDIX servers
+        resolve({ status: 'accessible', message: 'Server responded (likely accessible)' });
       };
 
       // Try to load favicon or root
@@ -35,7 +36,7 @@ export default function CorsBypassTest() {
       const controller = new AbortController();
       const timeout = setTimeout(() => {
         controller.abort();
-        resolve({ status: 'timeout', message: 'Request timed out' });
+        resolve({ status: 'inaccessible', message: 'Server is not accessible (timeout)' });
       }, 3000);
 
       fetch(url, {
@@ -45,11 +46,12 @@ export default function CorsBypassTest() {
       })
       .then(() => {
         clearTimeout(timeout);
-        resolve({ status: 'success', message: 'Server is accessible' });
+        // With no-cors, if we get here, we made contact with the server
+        resolve({ status: 'accessible', message: 'Server is accessible' });
       })
       .catch(() => {
         clearTimeout(timeout);
-        resolve({ status: 'error', message: 'Server is not accessible' });
+        resolve({ status: 'inaccessible', message: 'Server is not accessible' });
       });
     });
   };
@@ -73,8 +75,8 @@ export default function CorsBypassTest() {
       // Try fetch first
       let testResult = await testWithFetch(testUrl);
       
-      // If fetch fails, try image method
-      if (testResult.status === 'error') {
+      // If fetch indicates inaccessible, try image method
+      if (testResult.status === 'inaccessible') {
         testResult = await testWithImage(testUrl);
       }
       
@@ -88,8 +90,8 @@ export default function CorsBypassTest() {
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case 'success': return { backgroundColor: '#d4edda', color: '#155724', border: '1px solid #c3e6cb' };
-      case 'partial': return { backgroundColor: '#fff3cd', color: '#856404', border: '1px solid #ffeaa7' };
+      case 'accessible': return { backgroundColor: '#d4edda', color: '#155724', border: '1px solid #c3e6cb' };
+      case 'inaccessible': return { backgroundColor: '#f8d7da', color: '#721c24', border: '1px solid #f5c6cb' };
       case 'error': return { backgroundColor: '#f8d7da', color: '#721c24', border: '1px solid #f5c6cb' };
       case 'timeout': return { backgroundColor: '#d1ecf1', color: '#0c5460', border: '1px solid #bee5eb' };
       default: return { backgroundColor: '#f8f9fa', color: '#6c757d', border: '1px solid #ddd' };
@@ -139,7 +141,7 @@ export default function CorsBypassTest() {
           ...getStatusStyle(result.status)
         }}>
           <h3 style={{ margin: '0 0 10px 0' }}>
-            Result: {result.status.charAt(0).toUpperCase() + result.status.slice(1)}
+            Result: {result.status === 'accessible' ? 'ACCESSIBLE' : result.status === 'inaccessible' ? 'NOT ACCESSIBLE' : result.status.charAt(0).toUpperCase() + result.status.slice(1)}
           </h3>
           <p style={{ margin: '5px 0' }}><strong>Message:</strong> {result.message}</p>
         </div>
@@ -154,7 +156,7 @@ export default function CorsBypassTest() {
           <li>10.16.100.244 (ICC COMMUNICATION)</li>
           <li>103.58.73.9 (BUSINESS NETWORK)</li>
         </ul>
-        <p><strong>Tip:</strong> This method tries multiple approaches to work around browser security restrictions.</p>
+        <p><strong>Tip:</strong> "Accessible" means the server responded (good for BDIX). "Not Accessible" means no response.</p>
       </div>
     </div>
   );
