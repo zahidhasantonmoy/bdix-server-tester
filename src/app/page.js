@@ -15,79 +15,46 @@ export default function Home() {
 
   const checkServer = useCallback((url) => {
     return new Promise((resolve) => {
-      console.log(`Testing URL: ${url}`);
+      console.log(`Starting test for: ${url}`);
       
-      // Normalize the URL - ensure it has a protocol
-      let testUrl = url;
-      if (!url.includes('://')) {
-        testUrl = `http://${url}`;
+      // Ensure URL has protocol
+      let normalizedUrl = url;
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        normalizedUrl = `http://${url}`;
       }
       
-      // For BDIX testing, we'll try multiple approaches
-      // Approach 1: Simple fetch with no-cors
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
-        controller.abort();
-        console.log(`Fetch timeout for: ${testUrl}`);
-        // Try image approach as fallback
-        tryImageTest(testUrl, resolve);
-      }, 2500);
-      
-      fetch(testUrl, {
-        method: 'HEAD',
-        mode: 'no-cors',
-        signal: controller.signal,
-        redirect: 'follow'
-      })
-      .then(() => {
-        clearTimeout(timeoutId);
-        console.log(`Fetch success for: ${testUrl}`);
-        resolve('Online');
-      })
-      .catch((error) => {
-        clearTimeout(timeoutId);
-        console.log(`Fetch error for ${testUrl}: ${error.message}`);
-        // Try image approach as fallback
-        tryImageTest(testUrl, resolve);
-      });
+      // Try multiple approaches for BDIX testing
+      testWithFetch(normalizedUrl, resolve);
     });
   }, []);
   
-  // Helper function for image-based testing
-  const tryImageTest = (url, resolve) => {
-    console.log(`Trying image test for: ${url}`);
-    const img = new Image();
+  const testWithFetch = (url, resolve) => {
+    console.log(`Testing with fetch: ${url}`);
+    
+    const controller = new AbortController();
     const timeoutId = setTimeout(() => {
-      console.log(`Image timeout for: ${url}`);
+      controller.abort();
+      console.log(`Fetch timeout for: ${url}`);
       resolve('Offline');
-    }, 2500);
+    }, 2000);
     
-    img.onload = function() {
+    // Try a HEAD request first
+    fetch(url, {
+      method: 'HEAD',
+      mode: 'no-cors',
+      signal: controller.signal,
+      redirect: 'follow'
+    })
+    .then(() => {
       clearTimeout(timeoutId);
-      console.log(`Image success for: ${url}`);
+      console.log(`Fetch successful for: ${url}`);
       resolve('Online');
-    };
-    
-    img.onerror = function() {
+    })
+    .catch(() => {
       clearTimeout(timeoutId);
-      console.log(`Image error for: ${url}`);
+      console.log(`Fetch failed for: ${url}`);
       resolve('Offline');
-    };
-    
-    // Try different paths that might work
-    try {
-      // Try favicon first
-      img.src = `${url}/favicon.ico`;
-    } catch (e) {
-      try {
-        // Try root path as image
-        img.src = `${url}/`;
-      } catch (e2) {
-        clearTimeout(timeoutId);
-        console.log(`Image test failed for ${url}`);
-        resolve('Offline');
-      }
-    }
+    });
   };
 
   const checkAllServers = useCallback(async () => {
