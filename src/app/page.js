@@ -15,42 +15,36 @@ export default function Home() {
 
   const checkServer = useCallback((url) => {
     return new Promise((resolve) => {
-      console.log(`Testing server: ${url}`);
+      // Very simple approach - try to connect to the server
+      // This is the most direct way to test BDIX connectivity
       
-      // Normalize URL
-      let testUrl = url;
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        testUrl = `http://${url}`;
-      }
+      // Create an image element to test connectivity
+      const img = document.createElement('img');
       
-      // For BDIX testing, we need to be very specific about what we're testing
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
-        controller.abort();
-        console.log(`Test timeout for: ${testUrl}`);
+      // Set up timeout
+      const timeout = setTimeout(() => {
         resolve('Offline');
-      }, 3000);
+      }, 2500);
       
-      // Use a simple GET request instead of HEAD for better compatibility
-      fetch(testUrl, {
-        method: 'GET',
-        mode: 'no-cors',
-        signal: controller.signal,
-        redirect: 'follow',
-        // Don't load images, scripts, etc.
-        referrerPolicy: 'no-referrer'
-      })
-      .then(response => {
-        clearTimeout(timeoutId);
-        console.log(`Test successful for: ${testUrl}`);
-        // With no-cors, we can't read status, but if we get here, there's connectivity
+      // If image loads, server is accessible
+      img.onload = function() {
+        clearTimeout(timeout);
         resolve('Online');
-      })
-      .catch(error => {
-        clearTimeout(timeoutId);
-        console.log(`Test failed for: ${testUrl}, error: ${error.message}`);
+      };
+      
+      // If image fails to load, server is not accessible
+      img.onerror = function() {
+        clearTimeout(timeout);
         resolve('Offline');
-      });
+      };
+      
+      try {
+        // Try to load favicon - this forces a connection to the server
+        img.src = `${url}/favicon.ico`;
+      } catch (e) {
+        clearTimeout(timeout);
+        resolve('Offline');
+      }
     });
   }, []);
 
