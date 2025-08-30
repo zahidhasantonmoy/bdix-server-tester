@@ -1,9 +1,81 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiWifi, FiWifiOff, FiLoader, FiRefreshCw, FiServer, FiCheckCircle, FiXCircle, FiClock, FiSearch, FiFacebook, FiLinkedin, FiGithub, FiGlobe, FiExternalLink } from 'react-icons/fi';
-import { bdixServers } from './data/servers';
+import { FiWifi, FiWifiOff, FiLoader, FiRefreshCw, FiServer, FiCheckCircle, FiXCircle, FiClock, FiSearch, FiFacebook, FiLinkedin, FiGithub, FiGlobe, FiExternalLink, FiFilter } from 'react-icons/fi';
+
+// Categorized BDIX servers
+const categorizedServers = {
+  "FTP Servers": [
+    { name: "SAMONLINE FTP SERVER", urls: ["http://172.16.50.4", "http://172.16.50.5", "https://samftp.com"] },
+    { name: "DISCOVERY FTP SERVER", urls: ["http://discoveryftp.net"] },
+    { name: "WOW MOVIE ZONE FTP SERVER", urls: ["http://172.27.27.84"] },
+    { name: "BUSINESS NETWORK(B.NET) FTP SERVER", urls: ["http://ftpbd.net", "http://103.58.73.9", "http://media.ftpbd.net", "http://server1.ftpbd.net", "http://server4.ftpbd.net"] },
+    { name: "ICC COMMUNICATION FTP SERVER", urls: ["http://10.16.100.244"] },
+    { name: "EBOX FTP SERVER", urls: ["http://fs.ebox.live", "http://103.49.168.107", "http://fileserver.ebox.live"] },
+    { name: "POLLyFLIX & AMRBD FTP SERVER", urls: ["http://12.1.1.2", "http://12.1.1.3/flix", "http://pollyflix.com", "http://fs.amrbd.com", "http://fs2.amrbd.com"] },
+    { name: "CIRCLE NET FTP SERVER", urls: ["http://15.1.1.1", "http://circleftp.net", "http://ftp2.circleftp.net", "http://hd.circleftp.net"] },
+    { name: "MAZEDA NETWORK FTP SERVER", urls: ["http://172.22.22.101", "http://ftpweb.mazedanetworks.net"] },
+    { name: "CINEBIOSCOPE FTP SERVER", urls: ["http://www.cinebioscope.com"] },
+    { name: "MIDIPLEX FTP SERVER", urls: ["http://midiplex.net", "http://cdn.midiplex.net"] },
+    { name: "SEBAIT FTP SERVER", urls: ["http://103.195.1.50"] },
+    { name: "TAJPATA FTP SERVER", urls: ["http://www.tajpata.com", "http://file.tajpata.com"] },
+    { name: "BITFLIXBD FTP SERVER", urls: ["http://bitflixbd.com"] },
+    { name: "KHULNAFLIX FTP SERVER", urls: ["http://khulnaflix.net", "http://file.khulnaflix.net"] }
+  ],
+  "Media Servers": [
+    { name: "NATURALBD FTP SERVER", urls: ["http://www.naturalbd.com", "http://new.naturalbd.com"] },
+    { name: "DHAKAMOVIE FTP SERVER", urls: ["http://dhakamovie.com"] },
+    { name: "CTGMOVIES FTP SERVER", urls: ["http://ctgmovies.com", "http://crazyctg.com", "http://www.ctgflix.com", "http://media.ctgfun.com", "http://fs.evillagectg.com", "http://www.ctghall.com", "http://www.ctgstream.com", "https://www.ctghub.com"] },
+    { name: "MOVIEHAAT FTP SERVER", urls: ["http://moviehaat.net"] },
+    { name: "BOSSBD FTP SERVER", urls: ["http://www.bossbd.net", "http://bossbd.live", "http://cdn.bossbd.net", "http://cdn1.bossbd.net", "http://cdn2.bossbd.net"] },
+    { name: "MOVIEBAZER FTP SERVER", urls: ["http://mymoviebazar.com"] },
+    { name: "BDPLEX FTP SERVER", urls: ["http://bdplex.net"] },
+    { name: "TIMEPASSBD FTP SERVER", urls: ["http://103.200.36.242", "http://www.timepassbd.live", "http://ftp.timepassbd.live"] },
+    { name: "CITYCLOUDBD FTP SERVER", urls: ["http://103.102.253.250"] },
+    { name: "ABCMOVIES FTP SERVER", urls: ["http://103.103.239.66", "http://abcflixbd.com"] },
+    { name: "DEKHVHAI FTP SERVER", urls: ["http://dekhvhai.com"] },
+    { name: "ASIAN NET FTP SERVER", urls: ["http://asianftp.com"] },
+    { name: "MOJALOSS FTP SERVER", urls: ["https://mojaloss.net"] },
+    { name: "ELAACH FTP SERVER", urls: ["http://www.elaach.com"] },
+    { name: "DHAKA FTP SERVER", urls: ["http://dhakaftp.com"] }
+  ],
+  "Software & Applications": [
+    { name: "ALPHAMEDIAZONE FTP SERVER", urls: ["http://www.alphabroadway.com", "http://ftp.alphamediazone.com"] },
+    { name: "FREEDOWNLOADBD FTP SERVER", urls: ["http://www.freedownloadbd.com"] },
+    { name: "CINEMABAZER FTP SERVER", urls: ["http://cinemabazar.net", "http://103.81.104.98", "http://cinemabazar.net/DATA/NAS1"] },
+    { name: "INFOLINK FTP SERVER", urls: ["https://infolinkbd.com"] },
+    { name: "DNETBD FTP SERVER", urls: ["http://103.76.196.90", "https://dnetdrive.com"] },
+    { name: "VDOMELA FTP SERVER", urls: ["http://vdomela.com"] },
+    { name: "SUNPLEX FTP SERVER", urls: ["https://sunplex.net"] },
+    { name: "MOVIEMELA FTP SERVER", urls: ["http://www.moviemela.live"] },
+    { name: "MOVIEBOXBD FTP SERVER", urls: ["http://movieboxbd.com"] }
+  ],
+  "ISP Specific": [
+    { name: "LINK3 INTERNET FTP SERVER", urls: ["http://www.cinehub24.com"] },
+    { name: "DHAKA FIBER NET FTP SERVER", urls: ["http://media.dfnbd.net"] },
+    { name: "EKUSHE NET FTP SERVER", urls: ["http://10.100.100.2"] },
+    { name: "EVOLUTION FTP SERVER", urls: ["http://www.evonetbd.com"] },
+    { name: "DREAMNETBD FTP SERVER", urls: ["https://dreamnetbd.com", "http://bddreamnet.blogspot.com"] },
+    { name: "BDLAN FTP SERVER", urls: ["http://www.bdlan.net"] },
+    { name: "LINK71 FTP SERVER", urls: ["http://103.102.27.170"] },
+    { name: "SURZOMAMA FTP SERVER", urls: ["http://103.85.235.254"] },
+    { name: "AFTAB NAGAR ONLINE SERVICE FTP SERVER", urls: ["https://www.anosbd.com", "https://www.anosbd.com/ftp"] },
+    { name: "BDSPEED FTP SERVER", urls: ["http://www.bdspeed.com"] }
+  ],
+  "Miscellaneous": [
+    { name: "MOVIECOUNTER FTP SERVER", urls: ["https://moviescounterhd.club"] },
+    { name: "NETMATRIX FTP SERVER", urls: ["http://www.netmatrixbd.com"] },
+    { name: "BOLMOVIES FTP SERVER", urls: ["http://www.bolmovies.com"] },
+    { name: "FURIOUS INTERNET FTP SERVER", urls: ["http://www.furiousnet.net", "http://media.furiousnet.net"] },
+    { name: "TETRASOFT FTP SERVER", urls: ["https://www.tetrasoftbd.com", "http://tetraplex.net.bd"] },
+    { name: "SKNETCITY FTP SERVER", urls: ["https://www.sknetcity.com"] },
+    { name: "UNIVISION FTP SERVER", urls: ["http://www.univisionbd.net"] },
+    { name: "IFLIX FTP SERVER", urls: ["https://www.iflix.com"] },
+    { name: "LEADTECHNOLOGY FTP SERVER", urls: ["http://leadtechnologybd.com/bdix-server"] },
+    { name: "QUICKONLINE FTP SERVER", urls: ["http://quickonlineftp.com"] }
+  ]
+};
 
 export default function Home() {
   const [serverStatus, setServerStatus] = useState({});
@@ -12,15 +84,45 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all'); // all, online, offline
   const [expandedServers, setExpandedServers] = useState({});
+  const [expandedCategories, setExpandedCategories] = useState({});
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  // Flatten servers for easier processing
+  const allServers = useMemo(() => {
+    const servers = [];
+    Object.entries(categorizedServers).forEach(([category, categoryServers]) => {
+      categoryServers.forEach(server => {
+        servers.push({ ...server, category });
+      });
+    });
+    return servers;
+  }, []);
+
+  // Get unique categories
+  const categories = ['All', ...Object.keys(categorizedServers)];
+
+  // Filter servers based on search and category
+  const filteredServers = useMemo(() => {
+    let filtered = allServers;
+    
+    // Apply search filter
+    if (searchTerm) {
+      filtered = filtered.filter(server => 
+        server.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        server.urls.some(url => url.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+    
+    // Apply category filter
+    if (selectedCategory !== 'All') {
+      filtered = filtered.filter(server => server.category === selectedCategory);
+    }
+    
+    return filtered;
+  }, [allServers, searchTerm, selectedCategory]);
 
   const checkServer = useCallback((url) => {
     return new Promise((resolve) => {
-      // Normalize URL
-      let testUrl = url.trim();
-      if (!testUrl.startsWith('http://') && !testUrl.startsWith('https://')) {
-        testUrl = `http://${testUrl}`;
-      }
-      
       // Use the working CORS Bypass approach
       const img = new Image();
       const timeout = setTimeout(() => {
@@ -39,7 +141,7 @@ export default function Home() {
       };
 
       // Try to load favicon
-      img.src = `${testUrl}/favicon.ico?t=${Date.now()}`;
+      img.src = `${url}/favicon.ico?t=${Date.now()}`;
     });
   }, []);
 
@@ -50,7 +152,7 @@ export default function Home() {
     // Initialize all servers as "Checking..."
     const initialStatus = {};
     let totalUrls = 0;
-    bdixServers.forEach(server => {
+    filteredServers.forEach(server => {
       server.urls.forEach((url, urlIndex) => {
         initialStatus[`${server.name}-${urlIndex}`] = 'Checking...';
         totalUrls++;
@@ -60,7 +162,7 @@ export default function Home() {
     
     // Create a flat list of all URLs to test
     const urlsToTest = [];
-    bdixServers.forEach(server => {
+    filteredServers.forEach(server => {
       server.urls.forEach((url, urlIndex) => {
         urlsToTest.push({ server, url, serverName: server.name, urlIndex });
       });
@@ -101,12 +203,19 @@ export default function Home() {
     }
     
     setIsLoading(false);
-  }, [checkServer]);
+  }, [checkServer, filteredServers]);
 
   const toggleServerExpansion = (serverName) => {
     setExpandedServers(prev => ({
       ...prev,
       [serverName]: !prev[serverName]
+    }));
+  };
+
+  const toggleCategoryExpansion = (category) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
     }));
   };
 
@@ -140,33 +249,21 @@ export default function Home() {
     }
   };
 
-  const filteredServers = bdixServers.filter(server => {
-    const matchesSearch = server.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          server.urls.some(url => url.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    if (filter === 'all') return matchesSearch;
-    
-    const hasStatus = server.urls.some((url, urlIndex) => {
-      const status = serverStatus[`${server.name}-${urlIndex}`] || 'Unknown';
-      return status.toLowerCase() === filter;
+  const filteredCategorizedServers = useMemo(() => {
+    const result = {};
+    Object.entries(categorizedServers).forEach(([category, servers]) => {
+      const filtered = servers.filter(server => 
+        filteredServers.some(fs => fs.name === server.name)
+      );
+      if (filtered.length > 0) {
+        result[category] = filtered;
+      }
     });
-    
-    return matchesSearch && hasStatus;
-  });
+    return result;
+  }, [filteredServers]);
 
-  const onlineCount = bdixServers.reduce((count, server) => {
-    return count + server.urls.filter((url, urlIndex) => {
-      const status = serverStatus[`${server.name}-${urlIndex}`] || 'Unknown';
-      return status === 'Online';
-    }).length;
-  }, 0);
-
-  const offlineCount = bdixServers.reduce((count, server) => {
-    return count + server.urls.filter((url, urlIndex) => {
-      const status = serverStatus[`${server.name}-${urlIndex}`] || 'Unknown';
-      return status === 'Offline';
-    }).length;
-  }, 0);
+  const onlineCount = Object.values(serverStatus).filter(status => status === 'Online').length;
+  const offlineCount = Object.values(serverStatus).filter(status => status === 'Offline').length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
@@ -224,7 +321,7 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6, duration: 0.5 }}
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-white rounded-xl shadow-md p-6 flex items-center gap-4 border-l-4 border-blue-500">
             <div className="bg-blue-100 p-3 rounded-full">
               <FiServer className="text-blue-600 text-2xl" />
@@ -232,7 +329,7 @@ export default function Home() {
             <div>
               <p className="text-gray-500 text-sm">Total Servers</p>
               <p className="text-2xl font-bold">
-                {bdixServers.reduce((sum, server) => sum + server.urls.length, 0)}
+                {allServers.reduce((sum, server) => sum + server.urls.length, 0)}
               </p>
             </div>
           </div>
@@ -254,6 +351,16 @@ export default function Home() {
             <div>
               <p className="text-gray-500 text-sm">Offline</p>
               <p className="text-2xl font-bold text-red-600">{offlineCount}</p>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl shadow-md p-6 flex items-center gap-4 border-l-4 border-purple-500">
+            <div className="bg-purple-100 p-3 rounded-full">
+              <FiFilter className="text-purple-600 text-2xl" />
+            </div>
+            <div>
+              <p className="text-gray-500 text-sm">Categories</p>
+              <p className="text-2xl font-bold text-purple-600">{Object.keys(categorizedServers).length}</p>
             </div>
           </div>
         </div>
@@ -280,38 +387,15 @@ export default function Home() {
             </div>
             
             <div className="flex gap-2">
-              <button
-                onClick={() => setFilter('all')}
-                className={`px-4 py-2 rounded-lg font-medium ${
-                  filter === 'all' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                All
-              </button>
-              <button
-                onClick={() => setFilter('online')}
-                className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 ${
-                  filter === 'online' 
-                    ? 'bg-green-600 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                <FiWifi className="text-green-500" />
-                Online
-              </button>
-              <button
-                onClick={() => setFilter('offline')}
-                className={`px-4 py-2 rounded-lg font-medium flex items-center gap-2 ${
-                  filter === 'offline' 
-                    ? 'bg-red-600 text-white' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                }`}
-              >
-                <FiWifiOff className="text-red-500" />
-                Offline
-              </button>
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
             </div>
           </div>
         </div>
@@ -345,116 +429,153 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Server List */}
+      {/* Server List by Category */}
       <main className="max-w-7xl mx-auto px-4 pb-12">
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          layout
-        >
-          <AnimatePresence>
-            {filteredServers.map((server, index) => (
-              <motion.div
-                key={server.name}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ delay: index * 0.05 }}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100"
+        {Object.entries(filteredCategorizedServers).map(([category, servers]) => (
+          <motion.div
+            key={category}
+            className="mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div 
+              className="flex justify-between items-center bg-white rounded-t-xl shadow-md p-4 cursor-pointer border-t-4 border-blue-500"
+              onClick={() => toggleCategoryExpansion(category)}
+            >
+              <h2 className="text-xl font-bold text-gray-800">{category}</h2>
+              <motion.div 
+                animate={{ rotate: expandedCategories[category] ? 180 : 0 }}
+                transition={{ duration: 0.2 }}
               >
-                <div 
-                  className="p-5 border-b border-gray-100 cursor-pointer flex justify-between items-center"
-                  onClick={() => toggleServerExpansion(server.name)}
-                >
-                  <h2 className="text-lg font-bold text-gray-800 truncate flex items-center gap-2">
-                    <FiServer className="text-blue-500" />
-                    {server.name}
-                  </h2>
-                  <motion.div 
-                    animate={{ rotate: expandedServers[server.name] ? 180 : 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </motion.div>
-                </div>
-                
-                <AnimatePresence>
-                  {expandedServers[server.name] && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="p-5">
-                        <ul className="space-y-3">
-                          {server.urls.map((url, urlIndex) => {
-                            const status = serverStatus[`${server.name}-${urlIndex}`] || 'Unknown';
-                            return (
-                              <motion.li 
-                                key={urlIndex}
-                                initial={{ opacity: 0, x: -10 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: urlIndex * 0.05 }}
-                                className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors cursor-pointer"
-                                onClick={() => openUrlInNewTab(url)}
-                              >
-                                <span className="text-sm text-gray-600 truncate mr-2 flex items-center gap-2">
-                                  <FiWifi className="text-gray-400 flex-shrink-0" />
-                                  <span className="truncate">{url}</span>
-                                </span>
-                                <div className="flex items-center gap-2">
-                                  <FiExternalLink className="text-gray-400" />
-                                  <span
-                                    className={`px-3 py-1 text-xs font-semibold rounded-full border flex items-center gap-1 whitespace-nowrap ${getStatusColor(status)}`}
-                                  >
-                                    {getStatusIcon(status)}
-                                    <span>{status}</span>
-                                  </span>
-                                </div>
-                              </motion.li>
-                            );
-                          })}
-                        </ul>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-                
-                {!expandedServers[server.name] && (
-                  <div className="p-5 pt-0">
-                    <div className="flex gap-2 flex-wrap">
-                      {server.urls.slice(0, 3).map((url, urlIndex) => {
-                        const status = serverStatus[`${server.name}-${urlIndex}`] || 'Unknown';
-                        return (
-                          <span
-                            key={urlIndex}
-                            className={`px-2 py-1 text-xs font-semibold rounded-full border flex items-center gap-1 ${getStatusColor(status)} cursor-pointer hover:opacity-80 transition-opacity`}
-                            onClick={() => openUrlInNewTab(url)}
-                          >
-                            <FiExternalLink className="text-gray-500" />
-                            {getStatusIcon(status)}
-                            <span className="truncate max-w-[100px]">{url.replace('http://', '').replace('https://', '')}</span>
-                          </span>
-                        );
-                      })}
-                      {server.urls.length > 3 && (
-                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600 border border-gray-200">
-                          +{server.urls.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
+                <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
               </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+            </div>
+            
+            <AnimatePresence>
+              {expandedCategories[category] && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="overflow-hidden"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                    <AnimatePresence>
+                      {servers.map((server, index) => (
+                        <motion.div
+                          key={server.name}
+                          layout
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ delay: index * 0.05 }}
+                          className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100"
+                        >
+                          <div 
+                            className="p-5 border-b border-gray-100 cursor-pointer flex justify-between items-center"
+                            onClick={() => toggleServerExpansion(server.name)}
+                          >
+                            <h2 className="text-lg font-bold text-gray-800 truncate flex items-center gap-2">
+                              <FiServer className="text-blue-500" />
+                              {server.name}
+                            </h2>
+                            <motion.div 
+                              animate={{ rotate: expandedServers[server.name] ? 180 : 0 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                              </svg>
+                            </motion.div>
+                          </div>
+                          
+                          <AnimatePresence>
+                            {expandedServers[server.name] && (
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="overflow-hidden"
+                              >
+                                <div className="p-5">
+                                  <ul className="space-y-3">
+                                    {server.urls.map((url, urlIndex) => {
+                                      const status = serverStatus[`${server.name}-${urlIndex}`] || 'Unknown';
+                                      return (
+                                        <motion.li 
+                                          key={urlIndex}
+                                          initial={{ opacity: 0, x: -10 }}
+                                          animate={{ opacity: 1, x: 0 }}
+                                          transition={{ delay: urlIndex * 0.05 }}
+                                          className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors cursor-pointer"
+                                          onClick={() => openUrlInNewTab(url)}
+                                        >
+                                          <span className="text-sm text-gray-600 truncate mr-2 flex items-center gap-2">
+                                            <FiWifi className="text-gray-400 flex-shrink-0" />
+                                            <span className="truncate">{url}</span>
+                                          </span>
+                                          <div className="flex items-center gap-2">
+                                            <FiExternalLink className="text-gray-400" />
+                                            <span
+                                              className={`px-3 py-1 text-xs font-semibold rounded-full border flex items-center gap-1 whitespace-nowrap ${getStatusColor(status)}`}
+                                            >
+                                              {getStatusIcon(status)}
+                                              <span>{status}</span>
+                                            </span>
+                                          </div>
+                                        </motion.li>
+                                      );
+                                    })}
+                                  </ul>
+                                </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                          
+                          {!expandedServers[server.name] && (
+                            <div className="p-5 pt-0">
+                              <div className="flex gap-2 flex-wrap">
+                                {server.urls.slice(0, 3).map((url, urlIndex) => {
+                                  const status = serverStatus[`${server.name}-${urlIndex}`] || 'Unknown';
+                                  return (
+                                    <span
+                                      key={urlIndex}
+                                      className={`px-2 py-1 text-xs font-semibold rounded-full border flex items-center gap-1 ${getStatusColor(status)} cursor-pointer hover:opacity-80 transition-opacity`}
+                                      onClick={() => openUrlInNewTab(url)}
+                                    >
+                                      <FiExternalLink className="text-gray-500" />
+                                      {getStatusIcon(status)}
+                                      <span className="truncate max-w-[100px]">{url.replace('http://', '').replace('https://', '')}</span>
+                                    </span>
+                                  );
+                                })}
+                                {server.urls.length > 3 && (
+                                  <span 
+                                    className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600 border border-gray-200 cursor-pointer"
+                                    onClick={() => toggleServerExpansion(server.name)}
+                                  >
+                                    +{server.urls.length - 3} more
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        ))}
         
-        {filteredServers.length === 0 && (
+        {Object.keys(filteredCategorizedServers).length === 0 && (
           <motion.div 
             className="text-center py-12"
             initial={{ opacity: 0 }}
