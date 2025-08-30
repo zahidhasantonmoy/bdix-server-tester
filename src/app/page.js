@@ -15,47 +15,44 @@ export default function Home() {
 
   const checkServer = useCallback((url) => {
     return new Promise((resolve) => {
-      console.log(`Starting test for: ${url}`);
+      console.log(`Testing server: ${url}`);
       
-      // Ensure URL has protocol
-      let normalizedUrl = url;
+      // Normalize URL
+      let testUrl = url;
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        normalizedUrl = `http://${url}`;
+        testUrl = `http://${url}`;
       }
       
-      // Try multiple approaches for BDIX testing
-      testWithFetch(normalizedUrl, resolve);
+      // For BDIX testing, we need to be very specific about what we're testing
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+        console.log(`Test timeout for: ${testUrl}`);
+        resolve('Offline');
+      }, 3000);
+      
+      // Use a simple GET request instead of HEAD for better compatibility
+      fetch(testUrl, {
+        method: 'GET',
+        mode: 'no-cors',
+        signal: controller.signal,
+        redirect: 'follow',
+        // Don't load images, scripts, etc.
+        referrerPolicy: 'no-referrer'
+      })
+      .then(response => {
+        clearTimeout(timeoutId);
+        console.log(`Test successful for: ${testUrl}`);
+        // With no-cors, we can't read status, but if we get here, there's connectivity
+        resolve('Online');
+      })
+      .catch(error => {
+        clearTimeout(timeoutId);
+        console.log(`Test failed for: ${testUrl}, error: ${error.message}`);
+        resolve('Offline');
+      });
     });
   }, []);
-  
-  const testWithFetch = (url, resolve) => {
-    console.log(`Testing with fetch: ${url}`);
-    
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => {
-      controller.abort();
-      console.log(`Fetch timeout for: ${url}`);
-      resolve('Offline');
-    }, 2000);
-    
-    // Try a HEAD request first
-    fetch(url, {
-      method: 'HEAD',
-      mode: 'no-cors',
-      signal: controller.signal,
-      redirect: 'follow'
-    })
-    .then(() => {
-      clearTimeout(timeoutId);
-      console.log(`Fetch successful for: ${url}`);
-      resolve('Online');
-    })
-    .catch(() => {
-      clearTimeout(timeoutId);
-      console.log(`Fetch failed for: ${url}`);
-      resolve('Offline');
-    });
-  };
 
   const checkAllServers = useCallback(async () => {
     setIsLoading(true);
