@@ -15,58 +15,55 @@ export default function Home() {
 
   const checkServer = useCallback((url) => {
     return new Promise((resolve) => {
-      // For BDIX testing, we need to handle different types of URLs appropriately
-      
-      // First, normalize the URL
+      // Normalize URL
       let testUrl = url;
       if (!url.startsWith('http://') && !url.startsWith('https://')) {
         testUrl = `http://${url}`;
       }
       
-      // For BDIX servers, we often need to test with a timeout and specific approach
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
-        controller.abort();
-        resolve('Offline');
-      }, 2000); // 2 second timeout for local network
+      // For BDIX testing, try multiple common paths
+      const pathsToTry = [
+        '',           // Root path
+        '/index.html', // Common index file
+        '/favicon.ico' // Favicon
+      ];
       
-      // Try a simple fetch first
-      fetch(testUrl, {
-        method: 'GET',
-        mode: 'no-cors',
-        signal: controller.signal,
-        redirect: 'follow'
-      })
-      .then(response => {
-        clearTimeout(timeoutId);
-        // For BDIX, if we get any response, the server is accessible
-        // This includes 404s, 403s, etc.
-        resolve('Online');
-      })
-      .catch(error => {
-        clearTimeout(timeoutId);
-        // If the first attempt fails, try a different approach
-        // Some BDIX servers might respond better to HEAD requests
-        const controller2 = new AbortController();
-        const timeoutId2 = setTimeout(() => {
-          controller2.abort();
+      // Try each path with a timeout
+      let attempts = 0;
+      const maxAttempts = pathsToTry.length;
+      
+      const tryNextPath = () => {
+        if (attempts >= maxAttempts) {
           resolve('Offline');
-        }, 2000);
+          return;
+        }
         
-        fetch(testUrl, {
+        const path = pathsToTry[attempts];
+        const fullUrl = path ? `${testUrl}${path}` : testUrl;
+        attempts++;
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => {
+          controller.abort();
+          tryNextPath();
+        }, 1500); // 1.5 second timeout per attempt
+        
+        fetch(fullUrl, {
           method: 'HEAD',
           mode: 'no-cors',
-          signal: controller2.signal
+          signal: controller.signal
         })
         .then(() => {
-          clearTimeout(timeoutId2);
+          clearTimeout(timeoutId);
           resolve('Online');
         })
         .catch(() => {
-          clearTimeout(timeoutId2);
-          resolve('Offline');
+          clearTimeout(timeoutId);
+          tryNextPath();
         });
-      });
+      };
+      
+      tryNextPath();
     });
   }, []);
 
