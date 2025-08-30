@@ -14,41 +14,49 @@ export default function Home() {
   const [expandedServers, setExpandedServers] = useState({});
 
   const checkServer = useCallback(async (server, url) => {
-    try {
-      // For BDIX testing, we need to check different types of URLs
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+    return new Promise((resolve) => {
+      // Create an image element to test connectivity
+      // This approach works better for BDIX testing as it bypasses some CORS limitations
+      const img = new Image();
       
-      // If it's an IP address, we can try a more direct approach
-      if (url.startsWith('http://') && (url.match(/\d+\.\d+\.\d+\.\d+/) || url.includes('172.') || url.includes('10.') || url.includes('192.168.'))) {
-        // For IP-based URLs, try to fetch a simple resource
-        const response = await fetch(url, { 
-          method: 'HEAD', // Use HEAD request to minimize data transfer
-          mode: 'no-cors',
-          signal: controller.signal,
-          redirect: 'follow'
-        });
-        
-        clearTimeout(timeoutId);
-        // For BDIX, if we get any response (even with no-cors), it likely means accessible
-        return 'Online';
-      } else {
-        // For domain-based URLs, use a simple fetch
-        await fetch(url, { 
-          mode: 'no-cors', 
-          signal: controller.signal 
-        });
-        
-        clearTimeout(timeoutId);
-        return 'Online';
+      // Set a timeout for the test
+      const timeout = setTimeout(() => {
+        img.src = ''; // Cancel the request
+        resolve('Timeout');
+      }, 5000);
+      
+      // If the image loads, the server is accessible
+      img.onload = () => {
+        clearTimeout(timeout);
+        resolve('Online');
+      };
+      
+      // If there's an error, the server is not accessible
+      img.onerror = () => {
+        clearTimeout(timeout);
+        resolve('Offline');
+      };
+      
+      // Try to load a favicon or a simple resource from the server
+      // This works for both IP addresses and domain names
+      try {
+        // For BDIX testing, we try to access a common resource
+        // We use a simple approach that works better with local network testing
+        if (url.endsWith('/')) {
+          img.src = `${url}favicon.ico`;
+        } else if (url.includes('://')) {
+          // Add a simple path to test
+          img.src = `${url}/favicon.ico`;
+        } else {
+          // Handle cases where URL might not be properly formatted
+          img.src = `http://${url}/favicon.ico`;
+        }
+      } catch (e) {
+        // If there's an error creating the URL, mark as offline
+        clearTimeout(timeout);
+        resolve('Offline');
       }
-    } catch (error) {
-      // Check if it's a timeout or actual network error
-      if (error.name === 'AbortError') {
-        return 'Timeout';
-      }
-      return 'Offline';
-    }
+    });
   }, []);
 
   const checkAllServers = useCallback(async () => {
