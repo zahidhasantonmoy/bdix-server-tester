@@ -175,9 +175,9 @@ export default function BDIXConnectivityTest() {
         <h3>Instructions:</h3>
         <ol>
           <li>Enter a BDIX server URL in the format shown below</li>
-          <li>Click "Test Server" to check connectivity</li>
-          <li>"ACCESSIBLE" means you can reach the server</li>
-          <li>"NOT ACCESSIBLE" means the server is blocked or unreachable</li>
+          <li>Click &quot;Test Server&quot; to check connectivity</li>
+          <li>&quot;ACCESSIBLE&quot; means you can reach the server</li>
+          <li>&quot;NOT ACCESSIBLE&quot; means the server is blocked or unreachable</li>
         </ol>
         
         <h3>Sample BDIX Servers:</h3>
@@ -187,7 +187,7 @@ export default function BDIXConnectivityTest() {
           <li><strong>ICC COMMUNICATION:</strong> http://10.16.100.244</li>
           <li><strong>WOW MOVIE ZONE:</strong> http://172.27.27.84</li>
         </ul>
-        <p><strong>Important:</strong> These tests only work correctly when you're on a BDIX-enabled network.</p>
+        <p><strong>Important:</strong> These tests only work correctly when you&apos;re on a BDIX-enabled network.</p>
       </div>
     </div>
   );

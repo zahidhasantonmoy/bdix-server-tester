@@ -114,7 +114,7 @@ export default function SimpleTest() {
           <li><strong>WOW MOVIE ZONE:</strong> http://172.27.27.84</li>
           <li><strong>BUSINESS NET:</strong> http://103.58.73.9</li>
         </ul>
-        <p><em>Note: Test these only if you're on a BDIX-enabled network.</em></p>
+                      <p><em>Note: Test these only if you&apos;re on a BDIX-enabled network.</em></p>
       </div>
     </div>
   );
