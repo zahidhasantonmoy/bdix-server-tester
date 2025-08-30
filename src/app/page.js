@@ -15,10 +15,8 @@ export default function Home() {
 
   const checkServer = useCallback((url) => {
     return new Promise((resolve) => {
-      // Carefully process the URL
+      // Normalize URL
       let testUrl = url.trim();
-      
-      // Add protocol if missing
       if (!testUrl.startsWith('http://') && !testUrl.startsWith('https://')) {
         testUrl = `http://${testUrl}`;
       }
@@ -28,31 +26,43 @@ export default function Home() {
         testUrl = testUrl.slice(0, -1);
       }
       
-      console.log('Testing BDIX server:', testUrl);
+      // Test multiple common paths
+      const pathsToTest = ['', '/favicon.ico', '/index.html'];
+      let testedPaths = 0;
       
-      // For BDIX testing, we'll try a simple fetch
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
-        controller.abort();
-        console.log('Timeout for:', testUrl);
-        resolve('Offline');
-      }, 2500);
+      const testNextPath = () => {
+        if (testedPaths >= pathsToTest.length) {
+          resolve('Offline');
+          return;
+        }
+        
+        const path = pathsToTest[testedPaths];
+        const fullPath = path ? `${testUrl}${path}` : testUrl;
+        testedPaths++;
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => {
+          controller.abort();
+          testNextPath();
+        }, 1500);
+        
+        fetch(fullPath, {
+          method: 'HEAD',
+          mode: 'no-cors',
+          signal: controller.signal,
+          redirect: 'follow'
+        })
+        .then(() => {
+          clearTimeout(timeoutId);
+          resolve('Online');
+        })
+        .catch(() => {
+          clearTimeout(timeoutId);
+          testNextPath();
+        });
+      };
       
-      fetch(testUrl, {
-        method: 'HEAD',
-        mode: 'no-cors',
-        signal: controller.signal
-      })
-      .then(() => {
-        clearTimeout(timeoutId);
-        console.log('Success for:', testUrl);
-        resolve('Online');
-      })
-      .catch((error) => {
-        clearTimeout(timeoutId);
-        console.log('Failed for:', testUrl, error.message);
-        resolve('Offline');
-      });
+      testNextPath();
     });
   }, []);
 
