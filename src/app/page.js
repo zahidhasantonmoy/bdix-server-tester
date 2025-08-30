@@ -21,19 +21,39 @@ export default function Home() {
         testUrl = `http://${url}`;
       }
       
-      // Very simple fetch - just test if we can connect
-      fetch(testUrl, { 
-        method: 'HEAD',
+      // For BDIX servers, we often need to test specific paths
+      // Try the root path first
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      
+      fetch(testUrl, {
+        method: 'GET',
         mode: 'no-cors',
-        redirect: 'follow'
+        signal: controller.signal
       })
       .then(() => {
-        // If we get here, we could connect (even with CORS restrictions)
+        clearTimeout(timeoutId);
         resolve('Online');
       })
       .catch(() => {
-        // If we get here, we couldn't connect at all
-        resolve('Offline');
+        clearTimeout(timeoutId);
+        // Try with a simple resource like favicon
+        const controller2 = new AbortController();
+        const timeoutId2 = setTimeout(() => controller2.abort(), 3000);
+        
+        fetch(`${testUrl}/favicon.ico`, {
+          method: 'GET',
+          mode: 'no-cors',
+          signal: controller2.signal
+        })
+        .then(() => {
+          clearTimeout(timeoutId2);
+          resolve('Online');
+        })
+        .catch(() => {
+          clearTimeout(timeoutId2);
+          resolve('Offline');
+        });
       });
     });
   }, []);
