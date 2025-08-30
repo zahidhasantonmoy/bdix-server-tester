@@ -15,29 +15,44 @@ export default function Home() {
 
   const checkServer = useCallback((url) => {
     return new Promise((resolve) => {
-      // Very simple approach - just try to connect
-      const img = new Image();
-      const timeout = setTimeout(() => {
-        resolve('Offline');
-      }, 2000);
+      // Carefully process the URL
+      let testUrl = url.trim();
       
-      img.onload = () => {
-        clearTimeout(timeout);
-        resolve('Online');
-      };
-      
-      img.onerror = () => {
-        clearTimeout(timeout);
-        resolve('Offline');
-      };
-      
-      // Try to load something from the server
-      try {
-        img.src = `${url}/favicon.ico`;
-      } catch (e) {
-        clearTimeout(timeout);
-        resolve('Offline');
+      // Add protocol if missing
+      if (!testUrl.startsWith('http://') && !testUrl.startsWith('https://')) {
+        testUrl = `http://${testUrl}`;
       }
+      
+      // Remove trailing slash if present
+      if (testUrl.endsWith('/')) {
+        testUrl = testUrl.slice(0, -1);
+      }
+      
+      console.log('Testing BDIX server:', testUrl);
+      
+      // For BDIX testing, we'll try a simple fetch
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        controller.abort();
+        console.log('Timeout for:', testUrl);
+        resolve('Offline');
+      }, 2500);
+      
+      fetch(testUrl, {
+        method: 'HEAD',
+        mode: 'no-cors',
+        signal: controller.signal
+      })
+      .then(() => {
+        clearTimeout(timeoutId);
+        console.log('Success for:', testUrl);
+        resolve('Online');
+      })
+      .catch((error) => {
+        clearTimeout(timeoutId);
+        console.log('Failed for:', testUrl, error.message);
+        resolve('Offline');
+      });
     });
   }, []);
 
