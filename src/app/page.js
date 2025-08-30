@@ -15,67 +15,29 @@ export default function Home() {
 
   const checkServer = useCallback((url) => {
     return new Promise((resolve) => {
-      // Normalize and clean the URL
-      let testUrl = url.trim();
+      // Very simple approach - just try to connect
+      const img = new Image();
+      const timeout = setTimeout(() => {
+        resolve('Offline');
+      }, 2000);
       
-      // If no protocol, assume http
-      if (!testUrl.startsWith('http://') && !testUrl.startsWith('https://')) {
-        testUrl = `http://${testUrl}`;
-      }
-      
-      // For BDIX testing, we need to be very specific
-      // Some servers might be IP-based, others domain-based
-      const isIpAddress = /^https?:\/\/(\d{1,3}\.){3}\d{1,3}/.test(testUrl);
-      
-      // Try multiple approaches
-      const testMethods = [
-        // Method 1: HEAD request
-        () => {
-          return fetch(testUrl, {
-            method: 'HEAD',
-            mode: 'no-cors',
-            redirect: 'follow'
-          });
-        },
-        // Method 2: GET request
-        () => {
-          return fetch(testUrl, {
-            method: 'GET',
-            mode: 'no-cors',
-            redirect: 'follow'
-          });
-        }
-      ];
-      
-      let methodIndex = 0;
-      
-      const tryNextMethod = () => {
-        if (methodIndex >= testMethods.length) {
-          resolve('Offline');
-          return;
-        }
-        
-        const method = testMethods[methodIndex];
-        methodIndex++;
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => {
-          controller.abort();
-          tryNextMethod();
-        }, 2000);
-        
-        method()
-          .then(() => {
-            clearTimeout(timeoutId);
-            resolve('Online');
-          })
-          .catch(() => {
-            clearTimeout(timeoutId);
-            tryNextMethod();
-          });
+      img.onload = () => {
+        clearTimeout(timeout);
+        resolve('Online');
       };
       
-      tryNextMethod();
+      img.onerror = () => {
+        clearTimeout(timeout);
+        resolve('Offline');
+      };
+      
+      // Try to load something from the server
+      try {
+        img.src = `${url}/favicon.ico`;
+      } catch (e) {
+        clearTimeout(timeout);
+        resolve('Offline');
+      }
     });
   }, []);
 
