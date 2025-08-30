@@ -23,17 +23,17 @@ export default function LinkStyleTest() {
     return new Promise((resolve) => {
       const img = new Image();
       const timeout = setTimeout(() => {
-        resolve({ id: server.id, status: 'timeout' });
+        resolve({ id: server.id, status: 'inaccessible' });
       }, 3000);
 
       img.onload = function() {
         clearTimeout(timeout);
-        resolve({ id: server.id, status: 'online' });
+        resolve({ id: server.id, status: 'accessible' });
       };
 
       img.onerror = function() {
         clearTimeout(timeout);
-        resolve({ id: server.id, status: 'offline' });
+        resolve({ id: server.id, status: 'accessible' });
       };
 
       // Try to load favicon or a simple resource
@@ -74,18 +74,16 @@ export default function LinkStyleTest() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'online': return 'green';
-      case 'offline': return 'red';
-      case 'timeout': return 'orange';
+      case 'accessible': return 'green';
+      case 'inaccessible': return 'red';
       default: return 'gray';
     }
   };
 
   const getStatusText = (status) => {
     switch (status) {
-      case 'online': return 'Online';
-      case 'offline': return 'Offline';
-      case 'timeout': return 'Timeout';
+      case 'accessible': return 'Accessible';
+      case 'inaccessible': return 'Not Accessible';
       default: return 'Not Tested';
     }
   };
@@ -216,7 +214,6 @@ export default function LinkStyleTest() {
           <li>This tool tests BDIX server connectivity from your browser</li>
           <li>Green = Server is accessible (you can likely access content)</li>
           <li>Red = Server is not accessible (blocked or not on BDIX)</li>
-          <li>Orange = Test timed out (slow connection or server issue)</li>
         </ul>
         <p><strong>Note:</strong> Results depend on your current network connection and ISP.</p>
       </div>

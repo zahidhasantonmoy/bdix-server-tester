@@ -32,7 +32,7 @@ export default function ExactLinkTest() {
         if (!completed) {
           completed = true;
           xhr.abort();
-          resolve({ server, status: 'timeout', time: 3000 });
+          resolve({ server, status: 'inaccessible', time: 3000 });
         }
       }, 3000);
       
@@ -47,9 +47,9 @@ export default function ExactLinkTest() {
           
           // For BDIX, any response means accessible
           if (xhr.status > 0) {
-            resolve({ server, status: 'success', time: responseTime });
+            resolve({ server, status: 'accessible', time: responseTime });
           } else {
-            resolve({ server, status: 'error', time: responseTime });
+            resolve({ server, status: 'inaccessible', time: responseTime });
           }
         }
       };
@@ -60,7 +60,7 @@ export default function ExactLinkTest() {
           completed = true;
           clearTimeout(timeout);
           const endTime = Date.now();
-          resolve({ server, status: 'error', time: endTime - startTime });
+          resolve({ server, status: 'inaccessible', time: endTime - startTime });
         }
       };
       
@@ -98,9 +98,8 @@ export default function ExactLinkTest() {
   // Get status color
   const getStatusColor = (status) => {
     switch (status) {
-      case 'success': return '#28a745';
-      case 'error': return '#dc3545';
-      case 'timeout': return '#ffc107';
+      case 'accessible': return '#28a745';
+      case 'inaccessible': return '#dc3545';
       default: return '#6c757d';
     }
   };
@@ -108,9 +107,8 @@ export default function ExactLinkTest() {
   // Get status text
   const getStatusText = (status) => {
     switch (status) {
-      case 'success': return 'Working';
-      case 'error': return 'Not Working';
-      case 'timeout': return 'Timeout';
+      case 'accessible': return 'Accessible';
+      case 'inaccessible': return 'Not Accessible';
       default: return 'Not Tested';
     }
   };
@@ -250,9 +248,8 @@ export default function ExactLinkTest() {
       }}>
         <h3>How BDIX Testing Works:</h3>
         <ul>
-          <li><strong>Working:</strong> Server is accessible from your network</li>
-          <li><strong>Not Working:</strong> Server is blocked or unreachable</li>
-          <li><strong>Timeout:</strong> Test took too long or server is slow</li>
+          <li><strong>Accessible:</strong> Server is accessible from your network</li>
+          <li><strong>Not Accessible:</strong> Server is blocked or unreachable</li>
         </ul>
         <p><strong>Important:</strong> These results show if you can connect to BDIX servers from your current network.</p>
       </div>
