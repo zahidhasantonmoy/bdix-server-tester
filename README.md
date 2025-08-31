@@ -15,7 +15,7 @@ A comprehensive web application for testing BDIX (Bangladesh Internet Exchange) 
 ### User Experience
 - **Dark/Light Mode**: Choose your preferred viewing theme
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
-- **Progressive Web App (PWA)**: Installable on mobile devices
+- **Progressive Web App (PVC)**: Installable on mobile devices
 - **Export Results**: Save test results for future reference
 - **Share Results**: Share your test results with others
 
@@ -68,6 +68,16 @@ yarn dev
 ### Deployment
 
 The easiest way to deploy this Next.js app is to use the [Vercel Platform](https://vercel.com/new).
+
+## Auto-commit and Deployment
+
+This project includes an automatic git commit and push system:
+
+- `npm run auto-commit` - Manually trigger an auto-commit
+- `npm run watch` - Watch for file changes and automatically commit and push
+- `watch.bat` - Windows batch file to start the file watcher
+
+The project also includes GitHub Actions for automatic deployment to Vercel when changes are pushed to the master branch.
 
 ## Project Structure
 
