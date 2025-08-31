@@ -822,219 +822,37 @@ Check your BDIX connectivity at bdix-tester.vercel.app`;
 
         {/* Server List by Category or Favorites */}
         {viewMode !== 'history' && (
-          <>
-            {Object.entries(filteredCategorizedServers).map(([category, servers]) => (
-              <motion.div
-                key={category}
-                className="mb-8"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <div 
-                  className={`flex justify-between items-center rounded-t-xl shadow-md p-4 cursor-pointer border-t-4 border-blue-500 ${
-                    darkMode ? 'bg-gray-800' : 'bg-white'
-                  }`}
-                  onClick={() => toggleCategoryExpansion(category)}
-                >
-                  <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'}`}>
-                    {category} ({servers.length})
-                  </h2>
-                  <div className="flex items-center gap-2">
-                    <motion.div 
-                      animate={{ rotate: expandedCategories[category] ? 180 : 0 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <svg className={`w-5 h-5 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </motion.div>
-                  </div>
-                </div>
-                
-                <AnimatePresence>
-                  {expandedCategories[category] && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-                        <AnimatePresence>
-                          {servers.map((server, index) => (
-                            <motion.div
-                              key={server.name}
-                              layout
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              exit={{ opacity: 0, y: -20 }}
-                              transition={{ delay: index * 0.05 }}
-                              className={`rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border ${
-                                darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'
-                              }`}
-                            >
-                              <div 
-                                className={`p-5 border-b ${
-                                  darkMode ? 'border-gray-700' : 'border-gray-100'
-                                } cursor-pointer flex justify-between items-center`}
-                                onClick={() => toggleServerExpansion(server.name)}
-                              >
-                                <h2 className={`text-lg font-bold truncate flex items-center gap-2 ${
-                                  darkMode ? 'text-white' : 'text-gray-800'
-                                }`}>
-                                  <FiServer className="text-blue-500" />
-                                  {server.name}
-                                  {favorites.includes(server.name) && (
-                                    <FiStar className="text-yellow-400 text-sm" />
-                                  )}
-                                </h2>
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      toggleFavorite(server.name);
-                                    }}
-                                    className={`p-1 rounded ${
-                                      favorites.includes(server.name) 
-                                        ? 'text-yellow-400' 
-                                        : darkMode 
-                                          ? 'text-gray-500 hover:text-yellow-400' 
-                                          : 'text-gray-400 hover:text-yellow-500'
-                                    }`}
-                                    title={favorites.includes(server.name) ? "Remove from favorites" : "Add to favorites"}
-                                  >
-                                    <FiStar />
-                                  </button>
-                                  <motion.div 
-                                    animate={{ rotate: expandedServers[server.name] ? 180 : 0 }}
-                                    transition={{ duration: 0.2 }}
-                                  >
-                                    <svg className={`w-5 h-5 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
-                                  </motion.div>
-                                </div>
-                              </div>
-                              
-                              <AnimatePresence>
-                                {expandedServers[server.name] && (
-                                  <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: 'auto', opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                    className="overflow-hidden"
-                                  >
-                                    <div className="p-5">
-                                      <ul className="space-y-3">
-                                        {server.urls.map((url, urlIndex) => {
-                                          const status = serverStatus[`${server.name}-${urlIndex}`] || 'Unknown';
-                                          return (
-                                            <motion.li 
-                                              key={urlIndex}
-                                              initial={{ opacity: 0, x: -10 }}
-                                              animate={{ opacity: 1, x: 0 }}
-                                              transition={{ delay: urlIndex * 0.05 }}
-                                              className={`flex justify-between items-center p-3 rounded-lg border hover:bg-opacity-50 transition-colors cursor-pointer ${
-                                                darkMode 
-                                                  ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' 
-                                                  : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
-                                              }`}
-                                              onClick={() => openUrlInNewTab(url)}
-                                            >
-                                              <span className={`text-sm truncate mr-2 flex items-center gap-2 ${
-                                                darkMode ? 'text-gray-300' : 'text-gray-600'
-                                              }`}>
-                                                <FiWifi className={darkMode ? 'text-gray-500' : 'text-gray-400'} />
-                                                <span className="truncate">{url}</span>
-                                              </span>
-                                              <div className="flex items-center gap-2">
-                                                <FiExternalLink className={darkMode ? 'text-gray-500' : 'text-gray-400'} />
-                                                <span
-                                                  className={`px-3 py-1 text-xs font-semibold rounded-full border flex items-center gap-1 whitespace-nowrap ${
-                                                    getStatusColor(status)
-                                                  }`}
-                                                >
-                                                  {getStatusIcon(status)}
-                                                  <span>{status}</span>
-                                                </span>
-                                              </div>
-                                            </motion.li>
-                                          );
-                                        })}
-                                      </ul>
-                                    </div>
-                                  </motion.div>
-                                )}
-                              </AnimatePresence>
-                              
-                              {!expandedServers[server.name] && (
-                                <div className="p-5 pt-0">
-                                  <div className="flex gap-2 flex-wrap">
-                                    {server.urls.slice(0, 3).map((url, urlIndex) => {
-                                      const status = serverStatus[`${server.name}-${urlIndex}`] || 'Unknown';
-                                      return (
-                                        <span
-                                          key={urlIndex}
-                                          className={`px-2 py-1 text-xs font-semibold rounded-full border flex items-center gap-1 ${
-                                            getStatusColor(status)
-                                          } cursor-pointer hover:opacity-80 transition-opacity`}
-                                          onClick={() => openUrlInNewTab(url)}
-                                        >
-                                          <FiExternalLink className="text-gray-500" />
-                                          {getStatusIcon(status)}
-                                          <span className="truncate max-w-[100px]">{url.replace('http://', '').replace('https://', '')}</span>
-                                        </span>
-                                      );
-                                    })}
-                                    {server.urls.length > 3 && (
-                                      <span 
-                                        className={`px-2 py-1 text-xs font-semibold rounded-full cursor-pointer ${
-                                          darkMode 
-                                            ? 'bg-gray-700 text-gray-300 border border-gray-600' 
-                                            : 'bg-gray-100 text-gray-600 border border-gray-200'
-                                        }`}
-                                        onClick={() => toggleServerExpansion(server.name)}
-                                      >
-                                        +{server.urls.length - 3} more
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              )}
-                            </motion.div>
-                          ))}
-                        </AnimatePresence>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            ))}
-            
-            {Object.keys(filteredCategorizedServers).length === 0 && (
-              <motion.div 
-                className="text-center py-12"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
-              >
-                <div className={`rounded-2xl shadow-lg p-8 max-w-md mx-auto ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-                  <FiSearch className={`mx-auto text-4xl mb-4 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} />
-                  <h3 className={`text-xl font-semibold mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
-                    {viewMode === 'favorites' ? 'No favorite servers' : 'No servers found'}
-                  </h3>
-                  <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>
-                    {viewMode === 'favorites' 
-                      ? 'Add some servers to your favorites to see them here' 
-                      : 'Try adjusting your search or filter criteria'}
-                  </p>
-                </div>
-              </motion.div>
-            )}
-          </>
+          <TestResults
+            servers={filteredServers}
+            serverStatus={serverStatus}
+            favorites={favorites}
+            toggleFavorite={toggleFavorite}
+            openUrlInNewTab={openUrlInNewTab}
+            darkMode={darkMode}
+            expandedServers={expandedServers}
+            toggleServerExpansion={toggleServerExpansion}
+          />
+        )}
+        
+        {viewMode !== 'history' && Object.keys(filteredCategorizedServers).length === 0 && (
+          <motion.div 
+            className="text-center py-12"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className={`rounded-2xl shadow-lg p-8 max-w-md mx-auto ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
+              <FiSearch className={`mx-auto text-4xl mb-4 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} />
+              <h3 className={`text-xl font-semibold mb-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+                {viewMode === 'favorites' ? 'No favorite servers' : 'No servers found'}
+              </h3>
+              <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>
+                {viewMode === 'favorites' 
+                  ? 'Add some servers to your favorites to see them here' 
+                  : 'Try adjusting your search or filter criteria'}
+              </p>
+            </div>
+          </motion.div>
         )}
       </main>
 
