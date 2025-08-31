@@ -296,13 +296,21 @@ export default function Home() {
     // Record test completion
     const testEndTime = new Date().toISOString();
     
+    // Calculate online/offline counts for this specific test
+    let onlineCount = 0;
+    let offlineCount = 0;
+    Object.values(serverStatus).forEach(status => {
+      if (status === 'Online') onlineCount++;
+      else if (status === 'Offline') offlineCount++;
+    });
+    
     // Update test history
     const testResult = {
       id: Date.now(),
       timestamp: testEndTime,
       serversTested: serversToTest.length,
-      onlineCount: Object.values(serverStatus).filter(status => status === 'Online').length,
-      offlineCount: Object.values(serverStatus).filter(status => status === 'Offline').length,
+      onlineCount: onlineCount,
+      offlineCount: offlineCount,
       duration: (new Date(testEndTime) - new Date(testStartTime)) / 1000
     };
     
