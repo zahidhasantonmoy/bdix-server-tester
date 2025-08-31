@@ -74,7 +74,9 @@ The easiest way to deploy this Next.js app is to use the [Vercel Platform](https
 This project includes an automatic git commit and push system:
 
 - `npm run auto-commit` - Manually trigger an auto-commit
+- `npm run auto-commit-push` - Manually trigger an auto-commit and push to remote repository
 - `npm run watch` - Watch for file changes and automatically commit and push
+- `auto-commit-push.bat` - Windows batch file to easily run auto-commit and push
 - `watch.bat` - Windows batch file to start the file watcher
 
 The project also includes GitHub Actions for automatic deployment to Vercel when changes are pushed to the master branch.
