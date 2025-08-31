@@ -1,0 +1,8 @@
+# Redirects for Netlify (if deployed there)
+/* /index.html 200
+
+# API redirects
+/api/* /.netlify/functions/api-proxy 200
+
+# Offline support
+/offline /offline.html 200

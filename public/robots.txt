@@ -2,3 +2,28 @@ User-agent: *
 Allow: /
 
 Sitemap: https://bdix-tester.vercel.app/sitemap.xml
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: Yandex
+Allow: /
+
+User-agent: ia_archiver
+Allow: /
+
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/

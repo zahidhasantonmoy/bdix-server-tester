@@ -1,44 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# BDIX Connectivity Tester
 
-## BDIX Server Tester
+A comprehensive web application for testing BDIX (Bangladesh Internet Exchange) server connectivity. This tool helps users in Bangladesh determine which local content servers are accessible from their network connection.
 
-This application tests connectivity to BDIX servers in Bangladesh. It runs entirely in the browser and tests which servers are accessible from your network.
+## Features
+
+### Core Functionality
+- **Categorized Server Testing**: Organized testing by server type (FTP, Media, Software, etc.)
+- **Real-time Connectivity Testing**: Instant results showing which servers are accessible
+- **Favorites System**: Save frequently used servers for quick access
+- **Test History**: Keep track of previous test results
+- **Quick Test Mode**: Test only the most popular servers for faster results
+- **Search & Filter**: Easily find specific servers by name, URL, or category
+
+### User Experience
+- **Dark/Light Mode**: Choose your preferred viewing theme
+- **Responsive Design**: Works on desktop, tablet, and mobile devices
+- **Progressive Web App (PWA)**: Installable on mobile devices
+- **Export Results**: Save test results for future reference
+- **Share Results**: Share your test results with others
+
+### Advanced Features
+- **Network Information**: View your connection details and ISP information
+- **Analytics Dashboard**: Detailed statistics and trends
+- **Speed Test**: Measure your connection speed to BDIX servers
+- **BDIX Guide**: Comprehensive information about BDIX technology
+- **Server Comparison**: Compare multiple servers side by side
+- **Server Suggestions**: Community-driven server recommendation system
+
+## Technology Stack
+
+- **Frontend**: Next.js 15, React 19, Tailwind CSS
+- **UI Components**: Framer Motion for animations, React Icons
+- **State Management**: React Hooks
+- **Deployment**: Vercel
+- **API**: Next.js API Routes
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+- Node.js 18.x or later
+- npm or yarn
 
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/bdix-tester.git
+cd bdix-tester
+```
+
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Run the development server:
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### Deployment
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The easiest way to deploy this Next.js app is to use the [Vercel Platform](https://vercel.com/new).
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+bdix-tester/
+├── src/
+│   ├── app/
+│   │   ├── components/          # Reusable components
+│   │   ├── api/                 # API routes
+│   │   ├── data/                # Static data files
+│   │   ├── docs/                # Documentation pages
+│   │   ├── offline/             # Offline page
+│   │   ├── layout.js            # Root layout
+│   │   └── page.js              # Main page
+│   └── styles/
+├── public/                      # Static assets
+├── README.md
+└── package.json
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## API Routes
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `GET /api/servers` - Get server suggestions
+- `POST /api/servers` - Submit new server suggestions
 
-## Deploy on Vercel
+## Contributing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## BDIX Testing
+## License
 
-The application includes a simple test page at `/test-bdix` for debugging BDIX connectivity issues.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Thanks to all BDIX-enabled ISPs and content providers
+- Inspired by the need for better local content access in Bangladesh
+- Built with the amazing Next.js framework
+
+## Support
+
+If you have any questions or need help, please open an issue on GitHub.

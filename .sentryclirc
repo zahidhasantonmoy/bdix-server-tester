@@ -1,0 +1,10 @@
+{
+  "_version": "0.0.1",
+  "instrumentation": {
+    "runtime": "nodejs",
+    "sdk": {
+      "name": "@sentry/nextjs",
+      "version": "7.0.0"
+    }
+  }
+}

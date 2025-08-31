@@ -1,0 +1,2 @@
+# No ads.txt file needed for this open source project
+# This is a placeholder to prevent 404 errors
