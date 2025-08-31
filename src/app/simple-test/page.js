@@ -60,7 +60,7 @@ export default function SimpleTest() {
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', maxWidth: '600px', margin: '0 auto' }}>
+    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', maxWidth: '600px', margin: '0 auto', paddingTop: '80px' }}>
       <h1>Simple BDIX Connectivity Test</h1>
       <p>This tool tests if you can reach BDIX servers from your network.</p>
       

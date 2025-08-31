@@ -19,7 +19,7 @@ export default function OfflinePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4">
+    <div className=\"min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center p-4 pt-16\">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
         <div className="mx-auto bg-red-100 p-4 rounded-full w-24 h-24 flex items-center justify-center mb-6">
           <FiWifiOff className="text-red-500 text-4xl" />
