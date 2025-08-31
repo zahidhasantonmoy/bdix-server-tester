@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "auto-commit": "node scripts/auto-commit.js",
+    "auto-commit-push": "node scripts/auto-commit-push.js",
     "watch": "node scripts/watch-and-commit.js"
   },
   "dependencies": {
