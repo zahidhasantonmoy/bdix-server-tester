@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiWifi, FiWifiOff, FiLoader, FiRefreshCw, FiServer, FiCheckCircle, FiXCircle, FiClock, FiSearch, FiFacebook, FiLinkedin, FiGithub, FiGlobe, FiExternalLink, FiFilter, FiStar, FiSun, FiMoon, FiBarChart2, FiDownload, FiShare2, FiHeart, FiInfo, FiTrendingUp, FiMapPin, FiActivity, FiAlertTriangle, FiX, FiBook, FiChevronDown, FiChevronUp, FiTrendingDown } from 'react-icons/fi';
@@ -331,13 +333,6 @@ export default function Home() {
     }));
   };
 
-  const toggleCategoryExpansion = (category) => {
-    setExpandedCategories(prev => ({
-      ...prev,
-      [category]: !prev[category]
-    }));
-  };
-
   const toggleFavorite = (serverName) => {
     setFavorites(prev => 
       prev.includes(serverName) 
@@ -642,7 +637,31 @@ Check your BDIX connectivity at bdix-tester.vercel.app`;
               }`}
             >
               Quick Test {quickTestMode ? '(On)' : '(Off)'}
-            </button>\n          </div>\n        </div>\n      </motion.div>\n\n      {/* Network Information and Analytics */}\n      {viewMode !== 'history' && (\n        <motion.div \n          className=\"max-w-7xl mx-auto px-4 py-6\"\n          initial={{ opacity: 0, y: 20 }}\n          animate={{ opacity: 1, y: 0 }}\n          transition={{ delay: 0.9, duration: 0.5 }}\n        >\n          <div className=\"grid grid-cols-1 lg:grid-cols-2 gap-6\">\n            <NetworkInfo darkMode={darkMode} />\n            <AnalyticsDashboard \n              serverStatus={serverStatus} \n              testHistory={testHistory} \n              darkMode={darkMode} \n            />\n          </div>\n        </motion.div>\n      )}\n\n      {/* Controls */}
+            </button>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Network Information and Analytics */}
+      {viewMode !== 'history' && (
+        <motion.div 
+          className="max-w-7xl mx-auto px-4 py-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.9, duration: 0.5 }}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <NetworkInfo darkMode={darkMode} />
+            <AnalyticsDashboard 
+              serverStatus={serverStatus} 
+              testHistory={testHistory} 
+              darkMode={darkMode} 
+            />
+          </div>
+        </motion.div>
+      )}
+
+      {/* Controls */}
       {viewMode !== 'history' && (
         <motion.div 
           className="max-w-7xl mx-auto px-4 pb-6"

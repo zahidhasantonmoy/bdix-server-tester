@@ -19,7 +19,11 @@ export const metadata = {
     icon: '/favicon.svg',
   },
   manifest: '/manifest.json',
-  viewport: 'width=device-width, initial-scale=1',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
   themeColor: '#3b82f6',
 };
 
