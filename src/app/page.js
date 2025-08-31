@@ -1,12 +1,10 @@
-"use client";
-
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiWifi, FiWifiOff, FiLoader, FiRefreshCw, FiServer, FiCheckCircle, FiXCircle, FiClock, FiSearch, FiFacebook, FiLinkedin, FiGithub, FiGlobe, FiExternalLink, FiFilter, FiStar, FiSun, FiMoon, FiBarChart2, FiDownload, FiShare2, FiHeart, FiInfo, FiTrendingUp, FiMapPin, FiActivity, FiAlertTriangle, FiX, FiBook, FiChevronDown, FiChevronUp, FiTrendingDown } from 'react-icons/fi';
 
 import NetworkInfo from './components/NetworkInfo';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
-import ServerDetails from './components/ServerDetails';
+import TestResults from './components/TestResults';
 import { ErrorHandling } from './components/ErrorHandling';
 import SpeedTest from './components/SpeedTest';
 import BDIXGuide from './components/BDIXGuide';
@@ -323,6 +321,13 @@ export default function Home() {
     setExpandedServers(prev => ({
       ...prev,
       [serverName]: !prev[serverName]
+    }));
+  };
+
+  const toggleCategoryExpansion = (category) => {
+    setExpandedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
     }));
   };
 
