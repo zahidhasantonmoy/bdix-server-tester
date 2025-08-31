@@ -69,7 +69,7 @@ export default function TestResults({
               {category} ({categoryServers.length} servers)
             </h3>
             <div className="flex items-center">
-              <span className={`mr-2 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+              <span className={`mr-2 text-sm hidden sm:inline ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                 {expandedCategories[category] ? 'Collapse' : 'Expand'}
               </span>
               <div className={`transform transition-transform ${expandedCategories[category] ? 'rotate-180' : ''}`}>
@@ -82,7 +82,7 @@ export default function TestResults({
           
           {expandedCategories[category] && (
             <div className={`p-4 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 {categoryServers.map((server) => {
                   const isExpanded = expandedServers[server.name];
                   
@@ -95,8 +95,8 @@ export default function TestResults({
                         className={`p-3 flex justify-between items-center cursor-pointer ${darkMode ? 'border-gray-600' : 'border-gray-200'} border-b`}
                         onClick={() => toggleServerExpansion(server.name)}
                       >
-                        <div className="flex items-center">
-                          <FiServer className={`mr-2 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
+                        <div className="flex items-center min-w-0">
+                          <FiServer className={`mr-2 flex-shrink-0 ${darkMode ? 'text-blue-400' : 'text-blue-600'}`} />
                           <h4 className={`font-medium truncate ${darkMode ? 'text-white' : 'text-gray-800'}`}>
                             {server.name}
                           </h4>
@@ -140,7 +140,7 @@ export default function TestResults({
                                   <div className="flex items-center ml-2">
                                     <span className={`px-2 py-1 text-xs font-semibold rounded-full border flex items-center ${getStatusColor(status)}`}>
                                       {getStatusIcon(status)}
-                                      <span className="ml-1">{status}</span>
+                                      <span className="ml-1 hidden sm:inline">{status}</span>
                                     </span>
                                   </div>
                                 </li>
