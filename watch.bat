@@ -1,0 +1,3 @@
+@echo off
+echo Starting file watcher for auto-commit...
+node scripts/watch-and-commit.js
