@@ -13,6 +13,9 @@ import BDIXGuide from './components/BDIXGuide';
 import ServerComparison from './components/ServerComparison';
 import LoadingAnimation, { InlineLoadingSpinner } from './components/LoadingAnimation';
 import DeveloperInfo from './components/DeveloperInfo';
+import HelpSection from './components/HelpSection';
+import ContinuousMonitoring from './components/ContinuousMonitoring';
+import CustomServerList from './components/CustomServerList';
 
 // Categorized BDIX servers
 const categorizedServers = {
@@ -701,6 +704,20 @@ Check your BDIX connectivity at bdix-tester.vercel.app`;
         </motion.div>
       )}
 
+      {/* Additional Features Section */}
+      <motion.div 
+        className="max-w-7xl mx-auto px-4 py-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.0, duration: 0.5 }}
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <SpeedTest darkMode={darkMode} />
+          <ContinuousMonitoring darkMode={darkMode} servers={allServers} />
+          <CustomServerList darkMode={darkMode} />
+        </div>
+      </motion.div>
+
       {/* Controls */}
       {viewMode !== 'history' && (
         <motion.div 
@@ -973,6 +990,7 @@ Check your BDIX connectivity at bdix-tester.vercel.app`;
         </div>
       </footer>
       <DeveloperInfo darkMode={darkMode} />
+      <HelpSection darkMode={darkMode} />
       <ErrorHandling darkMode={darkMode} />
     </div>
   );

@@ -1,15 +1,15 @@
 {
-  "name": "BDIX Connectivity Tester",
+  "name": "BDIX Server Tester",
   "short_name": "BDIX Tester",
   "description": "Test your BDIX server connectivity in Bangladesh",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
+  "background_color": "#1e40af",
   "theme_color": "#3b82f6",
   "icons": [
     {
       "src": "/favicon.ico",
-      "sizes": "any",
+      "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
     {

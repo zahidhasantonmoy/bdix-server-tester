@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { FiWifi, FiWifiOff, FiClock, FiExternalLink, FiRefreshCw, FiChevronLeft } from 'react-icons/fi';
+import { FiWifi, FiWifiOff, FiClock, FiExternalLink, FiRefreshCw, FiChevronLeft, FiDownload, FiSearch, FiFilter } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 
 export default function TestResultsPage() {
@@ -10,6 +10,8 @@ export default function TestResultsPage() {
   const [testResults, setTestResults] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
   const [sortBy, setSortBy] = useState('status'); // status, name
+  const [filter, setFilter] = useState('all'); // all, online, offline
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     // Load test results from localStorage
@@ -62,7 +64,26 @@ export default function TestResultsPage() {
     }
   };
 
-  const sortedResults = testResults ? [...testResults].sort((a, b) => {
+  // Filter and search results
+  const filteredResults = testResults ? testResults.filter(result => {
+    // Apply filter
+    if (filter === 'online' && result.status !== 'Online') return false;
+    if (filter === 'offline' && result.status !== 'Offline') return false;
+    
+    // Apply search
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      return (
+        result.server.name.toLowerCase().includes(term) ||
+        result.server.category.toLowerCase().includes(term) ||
+        result.url.toLowerCase().includes(term)
+      );
+    }
+    
+    return true;
+  }) : [];
+
+  const sortedResults = filteredResults.sort((a, b) => {
     if (sortBy === 'status') {
       const statusOrderA = getStatusOrder(a.status);
       const statusOrderB = getStatusOrder(b.status);
@@ -73,11 +94,64 @@ export default function TestResultsPage() {
     } else {
       return a.server.name.localeCompare(b.server.name);
     }
-  }) : [];
+  });
 
   const onlineCount = testResults ? testResults.filter(result => result.status === 'Online').length : 0;
   const offlineCount = testResults ? testResults.filter(result => result.status === 'Offline').length : 0;
-  const checkingCount = testResults ? testResults.filter(result => result.status === 'Checking...').length : 0;
+  const filteredCount = filteredResults.length;
+
+  // Export functions
+  const exportToCSV = () => {
+    const headers = ['Server Name', 'Category', 'URL', 'Status'];
+    const rows = sortedResults.map(result => [
+      result.server.name,
+      result.server.category,
+      result.url,
+      result.status
+    ]);
+    
+    let csvContent = headers.join(',') + '\n';
+    rows.forEach(row => {
+      csvContent += row.map(field => `"${field}"`).join(',') + '\n';
+    });
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `bdix-test-results-${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportToJSON = () => {
+    const data = {
+      timestamp: new Date().toISOString(),
+      summary: {
+        total: testResults ? testResults.length : 0,
+        online: onlineCount,
+        offline: offlineCount
+      },
+      results: sortedResults.map(result => ({
+        serverName: result.server.name,
+        category: result.server.category,
+        url: result.url,
+        status: result.status
+      }))
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `bdix-test-results-${new Date().toISOString().split('T')[0]}.json`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   if (!testResults) {
     return (
@@ -128,17 +202,38 @@ export default function TestResultsPage() {
 
         {/* Controls */}
         <div className={`rounded-xl p-4 mb-6 ${darkMode ? 'bg-gray-800' : 'bg-white'} shadow`}>
-          <div className="flex flex-col md:flex-row justify-between gap-4">
+          <div className="flex flex-col lg:flex-row justify-between gap-4">
             <div>
               <h2 className={`text-lg font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                 Test Results Summary
               </h2>
               <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                Sorted by {sortBy === 'status' ? 'Status' : 'Server Name'}
+                {filteredCount} of {testResults.length} servers shown
               </p>
             </div>
             
             <div className="flex flex-wrap gap-3">
+              <div className="relative">
+                <FiSearch className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
+                <input
+                  type="text"
+                  placeholder="Search servers..."
+                  className={`pl-10 pr-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+              
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base ${darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
+              >
+                <option value="all">All Servers</option>
+                <option value="online">Online Only</option>
+                <option value="offline">Offline Only</option>
+              </select>
+              
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
@@ -147,6 +242,25 @@ export default function TestResultsPage() {
                 <option value="status">Sort by Status</option>
                 <option value="name">Sort by Name</option>
               </select>
+              
+              <div className="flex gap-2">
+                <button
+                  onClick={exportToCSV}
+                  className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
+                  title="Export to CSV"
+                >
+                  <FiDownload />
+                  <span className="hidden sm:inline">CSV</span>
+                </button>
+                <button
+                  onClick={exportToJSON}
+                  className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm ${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-gray-100 hover:bg-gray-200 text-gray-800'}`}
+                  title="Export to JSON"
+                >
+                  <FiDownload />
+                  <span className="hidden sm:inline">JSON</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
