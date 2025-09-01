@@ -9,7 +9,8 @@
     "lint": "next lint",
     "auto-commit": "node scripts/auto-commit.js",
     "auto-commit-push": "node scripts/auto-commit-push.js",
-    "watch": "node scripts/watch-and-commit.js"
+    "watch": "node scripts/watch-and-commit.js",
+    "dev:watch": "concurrently \"next dev\" \"node scripts/watch-and-commit.js\""
   },
   "dependencies": {
     "@sentry/nextjs": "^10.8.0",
@@ -27,6 +28,7 @@
     "@tailwindcss/postcss": "^4",
     "@types/react": "19.1.12",
     "chokidar": "^3.6.0",
+    "concurrently": "^8.2.2",
     "eslint": "^9",
     "eslint-config-next": "15.4.6",
     "tailwindcss": "^4"

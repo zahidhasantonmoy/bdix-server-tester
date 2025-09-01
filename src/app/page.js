@@ -11,6 +11,8 @@ import { ErrorHandling } from './components/ErrorHandling';
 import SpeedTest from './components/SpeedTest';
 import BDIXGuide from './components/BDIXGuide';
 import ServerComparison from './components/ServerComparison';
+import LoadingAnimation from './components/LoadingAnimation';
+import DeveloperInfo from './components/DeveloperInfo';
 
 // Categorized BDIX servers
 const categorizedServers = {
@@ -442,6 +444,21 @@ Check your BDIX connectivity at bdix-tester.vercel.app`;
 
   return (
     <div className={`min-h-screen ${darkMode ? 'dark bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'}`}>
+      {/* Beautiful Loading Animation */}
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-50"
+          >
+            <LoadingAnimation darkMode={darkMode} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      
       {/* Header */}
       <header className={`${darkMode ? 'bg-gray-800' : 'bg-gradient-to-r from-blue-600 to-indigo-700'} text-white shadow-xl pt-16`}>
         <div className="max-w-7xl mx-auto px-4 py-6">
@@ -932,6 +949,7 @@ Check your BDIX connectivity at bdix-tester.vercel.app`;
           </div>
         </div>
       </footer>
+      <DeveloperInfo darkMode={darkMode} />
       <ErrorHandling darkMode={darkMode} />
     </div>
   );
