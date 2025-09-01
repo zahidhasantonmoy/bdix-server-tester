@@ -11,7 +11,7 @@ import { ErrorHandling } from './components/ErrorHandling';
 import SpeedTest from './components/SpeedTest';
 import BDIXGuide from './components/BDIXGuide';
 import ServerComparison from './components/ServerComparison';
-import LoadingAnimation from './components/LoadingAnimation';
+import LoadingAnimation, { InlineLoadingSpinner } from './components/LoadingAnimation';
 import DeveloperInfo from './components/DeveloperInfo';
 
 // Categorized BDIX servers
@@ -444,17 +444,20 @@ Check your BDIX connectivity at bdix-tester.vercel.app`;
 
   return (
     <div className={`min-h-screen ${darkMode ? 'dark bg-gray-900' : 'bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50'}`}>
-      {/* Beautiful Loading Animation */}
+      {/* Beautiful Loading Animation - Shown only in the header area */}
       <AnimatePresence>
         {isLoading && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-50"
+            className="w-full bg-blue-500 text-white py-2 text-center"
           >
-            <LoadingAnimation darkMode={darkMode} />
+            <div className="flex items-center justify-center gap-2">
+              <InlineLoadingSpinner size="sm" />
+              <span>Testing server connectivity...</span>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -518,8 +521,17 @@ Check your BDIX connectivity at bdix-tester.vercel.app`;
                       : 'bg-white text-blue-600 hover:bg-blue-50 hover:scale-105'
                 }`}
               >
-                <FiRefreshCw className={isLoading ? 'animate-spin' : ''} />
-                {isLoading ? 'Testing...' : quickTestMode ? 'Quick Test' : 'Test All Servers'}
+                {isLoading ? (
+                  <>
+                    <InlineLoadingSpinner />
+                    Testing...
+                  </>
+                ) : (
+                  <>
+                    <FiRefreshCw />
+                    {quickTestMode ? 'Quick Test' : 'Test All Servers'}
+                  </>
+                )}
               </button>
             </motion.div>
           </div>
