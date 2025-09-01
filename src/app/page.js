@@ -264,13 +264,17 @@ export default function Home() {
     // Record test start time
     const testStartTime = new Date().toISOString();
     
-    // Process URLs in chunks
+    // Process URLs in chunks and collect results
+    const allResults = [];
+    
     for (let i = 0; i < urlsToTest.length; i += concurrencyLimit) {
       const chunk = urlsToTest.slice(i, i + concurrencyLimit);
       const chunkPromises = chunk.map(item => 
         checkServer(item.url).then(result => ({
           serverName: item.serverName,
           urlIndex: item.urlIndex,
+          url: item.url,
+          server: item.server,
           status: result.status,
           responseTime: result.responseTime
         }))
@@ -278,6 +282,7 @@ export default function Home() {
       
       // Wait for all promises in this chunk to complete
       const chunkResults = await Promise.all(chunkPromises);
+      allResults.push(...chunkResults);
       
       // Update status for completed URLs
       const updatedStatus = {};
@@ -301,22 +306,13 @@ export default function Home() {
     // Calculate online/offline counts for this specific test
     let onlineCount = 0;
     let offlineCount = 0;
-    Object.values(serverStatus).forEach(status => {
-      if (status === 'Online') onlineCount++;
-      else if (status === 'Offline') offlineCount++;
+    allResults.forEach(result => {
+      if (result.status === 'Online') onlineCount++;
+      else if (result.status === 'Offline') offlineCount++;
     });
     
-    // Prepare detailed results for the results page
-    const detailedResults = urlsToTest.map(item => ({
-      server: item.server,
-      url: item.url,
-      urlIndex: item.urlIndex,
-      status: serverStatus[`${item.serverName}-${item.urlIndex}`] || 'Unknown',
-      responseTime: null // We could add this if needed
-    }));
-    
     // Save results to localStorage
-    localStorage.setItem('lastTestResults', JSON.stringify(detailedResults));
+    localStorage.setItem('lastTestResults', JSON.stringify(allResults));
     
     // Update test history
     const testResult = {
@@ -334,7 +330,7 @@ export default function Home() {
     window.location.href = '/test-results';
     
     setIsLoading(false);
-  }, [checkServer, filteredServers, quickTestMode, quickTestServers, serverStatus]);
+  }, [checkServer, filteredServers, quickTestMode, quickTestServers]);
 
   const toggleServerExpansion = (serverName) => {
     setExpandedServers(prev => ({
