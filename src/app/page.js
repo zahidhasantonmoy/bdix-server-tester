@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiWifi, FiWifiOff, FiLoader, FiRefreshCw, FiServer, FiCheckCircle, FiXCircle, FiClock, FiSearch, FiFacebook, FiLinkedin, FiGithub, FiGlobe, FiExternalLink, FiFilter, FiStar, FiSun, FiMoon, FiBarChart2, FiDownload, FiShare2, FiHeart, FiInfo, FiTrendingUp, FiMapPin, FiActivity, FiAlertTriangle, FiX, FiBook, FiChevronDown, FiChevronUp, FiTrendingDown } from 'react-icons/fi';
+import { FiWifi, FiWifiOff, FiLoader, FiRefreshCw, FiServer, FiCheckCircle, FiXCircle, FiClock, FiSearch, FiFacebook, FiLinkedin, FiGithub, FiGlobe, FiExternalLink, FiFilter, FiStar, FiSun, FiMoon, FiBarChart2, FiDownload, FiShare2, FiHeart, FiInfo, FiTrendingUp, FiMapPin, FiActivity, FiAlertTriangle, FiX, FiBook, FiChevronDown, FiChevronUp, FiTrendingDown, FiStopCircle } from 'react-icons/fi';
 
 import NetworkInfo from './components/NetworkInfo';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
@@ -105,6 +105,7 @@ export default function Home() {
   const [sortBy, setSortBy] = useState('popularity'); // popularity, name, status
   const [viewMode, setViewMode] = useState('categories'); // categories, favorites, history
   const [quickTestMode, setQuickTestMode] = useState(false);
+  const [abortController, setAbortController] = useState(null);
 
   // Initialize from localStorage
   useEffect(() => {
@@ -207,23 +208,49 @@ export default function Home() {
     return filtered;
   }, [allServers, searchTerm, selectedCategory, serverStatus, viewMode, favorites, sortBy]);
 
-  const checkServer = useCallback((url) => {
+  const checkServer = useCallback((url, signal) => {
     return new Promise((resolve) => {
+      // Check if the request has been aborted
+      if (signal && signal.aborted) {
+        resolve({ status: 'Aborted', responseTime: 0 });
+        return;
+      }
+
       // Use the working CORS Bypass approach
       const img = new Image();
+      
+      // Set up abort handling
+      const abortHandler = () => {
+        img.src = ''; // This should abort the image load
+        resolve({ status: 'Aborted', responseTime: 0 });
+      };
+      
+      if (signal) {
+        signal.addEventListener('abort', abortHandler);
+      }
+
       const timeout = setTimeout(() => {
+        if (signal) {
+          signal.removeEventListener('abort', abortHandler);
+        }
         resolve({ status: 'Offline', responseTime: 3000 });
       }, 3000);
 
       const startTime = Date.now();
 
       img.onload = function() {
+        if (signal) {
+          signal.removeEventListener('abort', abortHandler);
+        }
         clearTimeout(timeout);
         const responseTime = Date.now() - startTime;
         resolve({ status: 'Online', responseTime });
       };
 
       img.onerror = function() {
+        if (signal) {
+          signal.removeEventListener('abort', abortHandler);
+        }
         clearTimeout(timeout);
         const responseTime = Date.now() - startTime;
         // For BDIX testing, even an error often means the server responded
@@ -236,7 +263,19 @@ export default function Home() {
   }, []);
 
   const checkAllServers = useCallback(async () => {
+    // If already loading, stop the current test
+    if (isLoading) {
+      if (abortController) {
+        abortController.abort();
+      }
+      return;
+    }
+
     const serversToTest = quickTestMode ? quickTestServers : filteredServers;
+    
+    // Create abort controller for this test
+    const controller = new AbortController();
+    setAbortController(controller);
     
     setIsLoading(true);
     setProgress(0);
@@ -263,6 +302,7 @@ export default function Home() {
     // Process URLs with concurrency limit to avoid overwhelming the browser
     const concurrencyLimit = 10; // Test 10 URLs simultaneously
     let completedUrls = 0;
+    let aborted = false;
     
     // Record test start time
     const testStartTime = new Date().toISOString();
@@ -270,70 +310,97 @@ export default function Home() {
     // Process URLs in chunks and collect results
     const allResults = [];
     
-    for (let i = 0; i < urlsToTest.length; i += concurrencyLimit) {
-      const chunk = urlsToTest.slice(i, i + concurrencyLimit);
-      const chunkPromises = chunk.map(item => 
-        checkServer(item.url).then(result => ({
-          serverName: item.serverName,
-          urlIndex: item.urlIndex,
-          url: item.url,
-          server: item.server,
-          status: result.status,
-          responseTime: result.responseTime
-        }))
-      );
+    try {
+      for (let i = 0; i < urlsToTest.length; i += concurrencyLimit) {
+        // Check if test has been aborted
+        if (controller.signal.aborted) {
+          aborted = true;
+          break;
+        }
+        
+        const chunk = urlsToTest.slice(i, i + concurrencyLimit);
+        const chunkPromises = chunk.map(item => 
+          checkServer(item.url, controller.signal).then(result => ({
+            serverName: item.serverName,
+            urlIndex: item.urlIndex,
+            url: item.url,
+            server: item.server,
+            status: result.status,
+            responseTime: result.responseTime
+          }))
+        );
+        
+        // Wait for all promises in this chunk to complete
+        const chunkResults = await Promise.all(chunkPromises);
+        allResults.push(...chunkResults);
+        
+        // Update status for completed URLs
+        const updatedStatus = {};
+        chunkResults.forEach(result => {
+          // Only update if not aborted
+          if (result.status !== 'Aborted') {
+            updatedStatus[`${result.serverName}-${result.urlIndex}`] = result.status;
+          }
+        });
+        
+        setServerStatus(prevStatus => ({
+          ...prevStatus,
+          ...updatedStatus
+        }));
+        
+        // Update progress
+        completedUrls += chunkResults.length;
+        setProgress(Math.round((completedUrls / totalUrls) * 100));
+      }
       
-      // Wait for all promises in this chunk to complete
-      const chunkResults = await Promise.all(chunkPromises);
-      allResults.push(...chunkResults);
-      
-      // Update status for completed URLs
-      const updatedStatus = {};
-      chunkResults.forEach(result => {
-        updatedStatus[`${result.serverName}-${result.urlIndex}`] = result.status;
-      });
-      
-      setServerStatus(prevStatus => ({
-        ...prevStatus,
-        ...updatedStatus
-      }));
-      
-      // Update progress
-      completedUrls += chunkResults.length;
-      setProgress(Math.round((completedUrls / totalUrls) * 100));
+      // If test was aborted, don't save results
+      if (aborted) {
+        // Reset status for any "Checking..." servers
+        const resetStatus = {...serverStatus};
+        Object.keys(resetStatus).forEach(key => {
+          if (resetStatus[key] === 'Checking...') {
+            resetStatus[key] = 'Aborted';
+          }
+        });
+        setServerStatus(resetStatus);
+        setProgress(0);
+      } else {
+        // Record test completion
+        const testEndTime = new Date().toISOString();
+        
+        // Calculate online/offline counts for this specific test
+        let onlineCount = 0;
+        let offlineCount = 0;
+        allResults.forEach(result => {
+          if (result.status === 'Online') onlineCount++;
+          else if (result.status === 'Offline') offlineCount++;
+        });
+        
+        // Save results to localStorage
+        localStorage.setItem('lastTestResults', JSON.stringify(allResults));
+        
+        // Update test history
+        const testResult = {
+          id: Date.now(),
+          timestamp: testEndTime,
+          serversTested: serversToTest.length,
+          onlineCount: onlineCount,
+          offlineCount: offlineCount,
+          duration: (new Date(testEndTime) - new Date(testStartTime)) / 1000
+        };
+        
+        setTestHistory(prev => [testResult, ...prev.slice(0, 9)]); // Keep last 10 tests
+        
+        // Redirect to results page
+        window.location.href = '/test-results';
+      }
+    } catch (error) {
+      console.error('Test error:', error);
+    } finally {
+      setIsLoading(false);
+      setAbortController(null);
     }
-    
-    // Record test completion
-    const testEndTime = new Date().toISOString();
-    
-    // Calculate online/offline counts for this specific test
-    let onlineCount = 0;
-    let offlineCount = 0;
-    allResults.forEach(result => {
-      if (result.status === 'Online') onlineCount++;
-      else if (result.status === 'Offline') offlineCount++;
-    });
-    
-    // Save results to localStorage
-    localStorage.setItem('lastTestResults', JSON.stringify(allResults));
-    
-    // Update test history
-    const testResult = {
-      id: Date.now(),
-      timestamp: testEndTime,
-      serversTested: serversToTest.length,
-      onlineCount: onlineCount,
-      offlineCount: offlineCount,
-      duration: (new Date(testEndTime) - new Date(testStartTime)) / 1000
-    };
-    
-    setTestHistory(prev => [testResult, ...prev.slice(0, 9)]); // Keep last 10 tests
-    
-    // Redirect to results page
-    window.location.href = '/test-results';
-    
-    setIsLoading(false);
-  }, [checkServer, filteredServers, quickTestMode, quickTestServers]);
+  }, [checkServer, filteredServers, quickTestMode, quickTestServers, serverStatus, isLoading, abortController]);
 
   const toggleServerExpansion = (serverName) => {
     setExpandedServers(prev => ({
@@ -466,11 +533,23 @@ Check your BDIX connectivity at bdix-tester.vercel.app`;
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="w-full bg-blue-500 text-white py-2 text-center"
+            className="w-full bg-blue-500 text-white py-3 text-center"
           >
-            <div className="flex items-center justify-center gap-2">
-              <InlineLoadingSpinner size="sm" />
-              <span>Testing server connectivity...</span>
+            <div className="flex items-center justify-center gap-3">
+              <motion.div
+                className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              />
+              <span className="font-medium">Testing server connectivity... {progress}%</span>
+            </div>
+            <div className="w-full max-w-md mx-auto mt-2 bg-blue-400 rounded-full h-1.5">
+              <motion.div 
+                className="bg-white h-1.5 rounded-full"
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+                transition={{ duration: 0.3 }}
+              />
             </div>
           </motion.div>
         )}
@@ -526,10 +605,10 @@ Check your BDIX connectivity at bdix-tester.vercel.app`;
               
               <button 
                 onClick={checkAllServers}
-                disabled={isLoading}
+                disabled={isLoading && !abortController}
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all shadow-lg ${
                   isLoading 
-                    ? 'bg-gray-400 cursor-not-allowed' 
+                    ? 'bg-red-500 hover:bg-red-600 text-white cursor-pointer' 
                     : darkMode 
                       ? 'bg-blue-600 hover:bg-blue-700' 
                       : 'bg-white text-blue-600 hover:bg-blue-50 hover:scale-105'
@@ -537,8 +616,8 @@ Check your BDIX connectivity at bdix-tester.vercel.app`;
               >
                 {isLoading ? (
                   <>
-                    <InlineLoadingSpinner />
-                    Testing...
+                    <FiStopCircle />
+                    Stop Test
                   </>
                 ) : (
                   <>

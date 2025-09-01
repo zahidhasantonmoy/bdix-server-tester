@@ -12,19 +12,39 @@ export default function CustomServerList({ darkMode = false }) {
   useEffect(() => {
     const savedServers = localStorage.getItem('customServers');
     if (savedServers) {
-      setCustomServers(JSON.parse(savedServers));
+      try {
+        const parsedServers = JSON.parse(savedServers);
+        if (Array.isArray(parsedServers)) {
+          setCustomServers(parsedServers);
+        }
+      } catch (e) {
+        console.error('Error parsing custom servers:', e);
+        setCustomServers([]);
+      }
     }
   }, []);
 
   // Save custom servers to localStorage
   useEffect(() => {
-    localStorage.setItem('customServers', JSON.stringify(customServers));
+    try {
+      localStorage.setItem('customServers', JSON.stringify(customServers));
+    } catch (e) {
+      console.error('Error saving custom servers:', e);
+    }
   }, [customServers]);
 
   const addServer = () => {
     if (newServer.name && newServer.url) {
+      // Validate URL format
+      try {
+        new URL(newServer.url);
+      } catch (e) {
+        alert('Please enter a valid URL (include http:// or https://)');
+        return;
+      }
+      
       const server = {
-        id: Date.now(),
+        id: Date.now() + Math.random(), // Better unique ID
         name: newServer.name,
         url: newServer.url,
         category: 'Custom'
@@ -39,15 +59,20 @@ export default function CustomServerList({ darkMode = false }) {
   };
 
   const exportServers = () => {
-    const dataStr = JSON.stringify(customServers, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `bdix-custom-servers-${new Date().toISOString().split('T')[0]}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
+    try {
+      const dataStr = JSON.stringify(customServers, null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      
+      const exportFileDefaultName = `bdix-custom-servers-${new Date().toISOString().split('T')[0]}.json`;
+      
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+    } catch (e) {
+      console.error('Error exporting servers:', e);
+      alert('Error exporting servers');
+    }
   };
 
   const importServers = (event) => {
@@ -64,11 +89,17 @@ export default function CustomServerList({ darkMode = false }) {
               id: Date.now() + Math.random()
             }));
             setCustomServers([...customServers, ...serversWithIds]);
+            alert(`Successfully imported ${importedServers.length} servers`);
+          } else {
+            alert('Invalid file format. Please import a valid JSON file.');
           }
         } catch (error) {
           console.error('Error importing servers:', error);
           alert('Error importing servers. Please check the file format.');
         }
+      };
+      reader.onerror = () => {
+        alert('Error reading file');
       };
       reader.readAsText(file);
     }
@@ -89,7 +120,7 @@ export default function CustomServerList({ darkMode = false }) {
             placeholder="Server name"
             value={newServer.name}
             onChange={(e) => setNewServer({...newServer, name: e.target.value})}
-            className={`flex-1 px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+            className={`flex-1 px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm ${
               darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
             }`}
           />
@@ -98,13 +129,14 @@ export default function CustomServerList({ darkMode = false }) {
             placeholder="http://server-url.com"
             value={newServer.url}
             onChange={(e) => setNewServer({...newServer, url: e.target.value})}
-            className={`flex-1 px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+            className={`flex-1 px-3 py-2 rounded-lg border focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm ${
               darkMode ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'
             }`}
           />
           <button
             onClick={addServer}
             className={`p-2 rounded-lg ${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-600 hover:bg-blue-700'} text-white`}
+            title="Add server"
           >
             <FiPlus />
           </button>
@@ -141,27 +173,28 @@ export default function CustomServerList({ darkMode = false }) {
       </div>
       
       {customServers.length > 0 ? (
-        <div className={`rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'} max-h-60 overflow-y-auto`}>
+        <div className={`rounded-lg overflow-hidden ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
           {customServers.map((server) => (
             <div 
               key={server.id} 
               className={`flex justify-between items-center p-3 border-b ${
-                darkMode ? 'border-gray-600' : 'border-gray-200'
+                darkMode ? 'border-gray-600' : 'border-gray-200 last:border-b-0'
               }`}
             >
-              <div>
-                <div className={`font-medium ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+              <div className="min-w-0 flex-1">
+                <div className={`font-medium truncate ${darkMode ? 'text-white' : 'text-gray-900'}`}>
                   {server.name}
                 </div>
-                <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                <div className={`text-sm truncate ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                   {server.url}
                 </div>
               </div>
               <button
                 onClick={() => removeServer(server.id)}
-                className={`p-2 rounded-full ${
+                className={`p-2 rounded-full ml-2 ${
                   darkMode ? 'hover:bg-gray-600 text-gray-400' : 'hover:bg-gray-200 text-gray-500'
                 }`}
+                title="Remove server"
               >
                 <FiTrash2 />
               </button>
@@ -171,7 +204,7 @@ export default function CustomServerList({ darkMode = false }) {
       ) : (
         <div className={`text-center py-8 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-50'}`}>
           <FiServer className={`mx-auto text-3xl mb-2 ${darkMode ? 'text-gray-500' : 'text-gray-400'}`} />
-          <p className={darkMode ? 'text-gray-400' : 'text-gray-500'}>
+          <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
             No custom servers added yet
           </p>
         </div>
