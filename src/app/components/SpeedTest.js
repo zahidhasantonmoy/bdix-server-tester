@@ -13,138 +13,170 @@ export default function SpeedTest({ darkMode = false }) {
   const [testPhase, setTestPhase] = useState(''); // ping, download, upload
   const [abortController, setAbortController] = useState(null);
 
-  // Real client-side speed test function
+  // Function to measure ping/latency
+  const measurePing = useCallback(async (signal) => {
+    setTestPhase('Measuring ping...');
+    const results = [];
+    
+    // Measure ping 3 times and take average
+    for (let i = 0; i < 3; i++) {
+      if (signal.aborted) throw new Error('Aborted');
+      
+      const start = performance.now();
+      try {
+        // Using a simple CORS-enabled endpoint
+        await fetch('https://httpbin.org/get', { 
+          method: 'HEAD', // HEAD request is faster
+          signal: signal,
+          cache: 'no-cache'
+        });
+        const end = performance.now();
+        results.push(end - start);
+      } catch (error) {
+        if (error.name === 'AbortError') throw new Error('Aborted');
+        // Even if request fails, we count the time
+        const end = performance.now();
+        results.push(end - start);
+      }
+      
+      // Small delay between requests
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    // Return average ping
+    const averagePing = results.reduce((a, b) => a + b, 0) / results.length;
+    return Math.round(averagePing);
+  }, []);
+
+  // Simple image-based download test (more compatible)
+  const measureDownloadWithImage = useCallback(async (signal) => {
+    setTestPhase('Testing download speed...');
+    setProgress(33);
+    
+    return new Promise((resolve) => {
+      if (signal.aborted) {
+        resolve(0);
+        return;
+      }
+      
+      const imageUrl = 'https://upload.wikimedia.org/wikipedia/commons/2/2d/Snake_River_%285mb%29.jpg'; // ~5MB image
+      const image = new Image();
+      
+      const start = performance.now();
+      
+      // Set up abort handling
+      const abortHandler = () => {
+        image.src = '';
+        resolve(0);
+      };
+      
+      if (signal) {
+        signal.addEventListener('abort', abortHandler);
+      }
+      
+      image.onload = function() {
+        if (signal) {
+          signal.removeEventListener('abort', abortHandler);
+        }
+        const end = performance.now();
+        const duration = (end - start) / 1000; // seconds
+        const bitsLoaded = 5 * 8 * 1000000; // 5MB in bits
+        const speedMbps = (bitsLoaded / duration / 1000000).toFixed(2);
+        resolve(parseFloat(speedMbps));
+      };
+      
+      image.onerror = function() {
+        if (signal) {
+          signal.removeEventListener('abort', abortHandler);
+        }
+        resolve(0);
+      };
+      
+      image.src = `${imageUrl}?t=${Date.now()}`;
+    });
+  }, []);
+
+  // Function to measure upload speed (simplified)
+  const measureUpload = useCallback(async (signal) => {
+    setTestPhase('Testing upload speed...');
+    setProgress(66);
+    
+    try {
+      // Create smaller data (200KB) for better compatibility
+      const data = new Uint8Array(200000);
+      for (let i = 0; i < data.length; i++) {
+        data[i] = Math.floor(Math.random() * 256);
+      }
+      
+      const start = performance.now();
+      const response = await fetch('https://httpbin.org/post', {
+        method: 'POST',
+        signal: signal,
+        body: data,
+        headers: {
+          'Content-Type': 'application/octet-stream'
+        }
+      });
+      
+      if (!response.ok) throw new Error('Upload test failed');
+      
+      const end = performance.now();
+      
+      // Calculate speed in Mbps
+      const duration = (end - start) / 1000; // seconds
+      const bitsLoaded = data.length * 8;
+      const speedMbps = (bitsLoaded / duration / 1000000).toFixed(2);
+      
+      return parseFloat(speedMbps);
+    } catch (error) {
+      if (error.name === 'AbortError') throw new Error('Aborted');
+      console.error('Upload test error:', error);
+      return 0; // Return 0 if test fails
+    }
+  }, []);
+
+  // Main speed test function
   const runSpeedTest = useCallback(async () => {
     setIsTesting(true);
     setDownloadSpeed(null);
     setUploadSpeed(null);
     setPing(null);
     setProgress(0);
-    setTestPhase('ping');
+    setTestPhase('Starting speed test...');
 
-    // Create abort controller for cancellation
+    // Create abort controller
     const controller = new AbortController();
     setAbortController(controller);
 
     try {
-      // Ping test (measure latency)
-      setTestPhase('Measuring ping...');
-      const pingStart = Date.now();
-      
-      // Try to ping a reliable server
-      try {
-        const pingResponse = await fetch('https://httpbin.org/get', { 
-          signal: controller.signal,
-          method: 'GET',
-          cache: 'no-cache'
-        });
-        if (!pingResponse.ok) throw new Error('Ping failed');
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          throw new Error('Test cancelled');
-        }
-        // Even if the request fails, we can measure the time
-      }
-      
-      const pingEnd = Date.now();
-      setPing(pingEnd - pingStart);
+      // Measure ping
+      const pingResult = await measurePing(controller.signal);
+      setPing(pingResult);
       setProgress(33);
 
-      // Download test
-      setTestPhase('Testing download speed...');
-      const downloadStart = Date.now();
-      let downloadBytes = 0;
-      const downloadChunks = [];
-      
-      try {
-        // Download a large file to measure speed
-        const downloadResponse = await fetch('https://httpbin.org/bytes/1000000', { 
-          signal: controller.signal,
-          cache: 'no-cache'
-        });
-        
-        if (!downloadResponse.ok) throw new Error('Download test failed');
-        
-        const reader = downloadResponse.body.getReader();
-        const contentLength = +downloadResponse.headers.get('content-length');
-        
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          downloadBytes += value.length;
-          downloadChunks.push(value);
-          
-          // Update progress periodically
-          if (contentLength) {
-            const progressPercent = Math.round((downloadBytes / contentLength) * 33);
-            setProgress(33 + progressPercent);
-          }
-        }
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          throw new Error('Test cancelled');
-        }
-        // Fallback method for download speed
-        downloadBytes = 5000000; // Simulate 5MB download
-      }
-      
-      const downloadEnd = Date.now();
-      const downloadDuration = (downloadEnd - downloadStart) / 1000; // seconds
-      const downloadMbps = ((downloadBytes * 8) / (downloadDuration * 1000000)).toFixed(2);
-      setDownloadSpeed(parseFloat(downloadMbps));
+      // Measure download using image method (more reliable)
+      const downloadResult = await measureDownloadWithImage(controller.signal);
+      setDownloadSpeed(downloadResult);
       setProgress(66);
 
-      // Upload test
-      setTestPhase('Testing upload speed...');
-      const uploadStart = Date.now();
-      let uploadSuccess = false;
-      
-      try {
-        // Create a 1MB blob for upload test
-        const uploadData = new Uint8Array(1000000).fill(0);
-        const blob = new Blob([uploadData]);
-        
-        const uploadResponse = await fetch('https://httpbin.org/post', {
-          signal: controller.signal,
-          method: 'POST',
-          body: blob,
-          headers: {
-            'Content-Type': 'application/octet-stream'
-          }
-        });
-        
-        if (uploadResponse.ok) {
-          uploadSuccess = true;
-        }
-      } catch (error) {
-        if (error.name === 'AbortError') {
-          throw new Error('Test cancelled');
-        }
-        // Upload test failed, but we'll show 0 Mbps
-      }
-      
-      const uploadEnd = Date.now();
-      const uploadDuration = (uploadEnd - uploadStart) / 1000; // seconds
-      
-      if (uploadSuccess) {
-        const uploadMbps = ((1000000 * 8) / (uploadDuration * 1000000)).toFixed(2);
-        setUploadSpeed(parseFloat(uploadMbps));
-      } else {
-        setUploadSpeed(0);
-      }
-      
+      // Measure upload
+      const uploadResult = await measureUpload(controller.signal);
+      setUploadSpeed(uploadResult);
       setProgress(100);
+
       setTestPhase('Test completed');
     } catch (error) {
-      if (error.message !== 'Test cancelled') {
+      if (error.message !== 'Aborted') {
         console.error('Speed test error:', error);
-        setTestPhase('Test failed');
+        setTestPhase('Test failed - check console for details');
+      } else {
+        setTestPhase('Test cancelled');
       }
     } finally {
       setIsTesting(false);
       setAbortController(null);
     }
-  }, []);
+  }, [measurePing, measureDownloadWithImage, measureUpload]);
 
   const stopTest = useCallback(() => {
     if (abortController) {
@@ -246,6 +278,17 @@ export default function SpeedTest({ darkMode = false }) {
           <p className={`text-center text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
             Testing your connection speed... This may take a moment.
           </p>
+        </motion.div>
+      )}
+      
+      {!isTesting && testPhase.includes('failed') && (
+        <motion.div 
+          className="mt-4 p-3 rounded-lg bg-red-100 text-red-800 text-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <p>Speed test failed. This might be due to network restrictions or CORS policies.</p>
+          <p className="mt-1">Try refreshing the page and running the test again.</p>
         </motion.div>
       )}
     </div>
