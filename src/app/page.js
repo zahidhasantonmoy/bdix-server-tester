@@ -306,6 +306,18 @@ export default function Home() {
       else if (status === 'Offline') offlineCount++;
     });
     
+    // Prepare detailed results for the results page
+    const detailedResults = urlsToTest.map(item => ({
+      server: item.server,
+      url: item.url,
+      urlIndex: item.urlIndex,
+      status: serverStatus[`${item.serverName}-${item.urlIndex}`] || 'Unknown',
+      responseTime: null // We could add this if needed
+    }));
+    
+    // Save results to localStorage
+    localStorage.setItem('lastTestResults', JSON.stringify(detailedResults));
+    
     // Update test history
     const testResult = {
       id: Date.now(),
@@ -317,6 +329,9 @@ export default function Home() {
     };
     
     setTestHistory(prev => [testResult, ...prev.slice(0, 9)]); // Keep last 10 tests
+    
+    // Redirect to results page
+    window.location.href = '/test-results';
     
     setIsLoading(false);
   }, [checkServer, filteredServers, quickTestMode, quickTestServers, serverStatus]);
