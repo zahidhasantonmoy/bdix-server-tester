@@ -27,7 +27,10 @@ const useServerTester = (servers: Server[]) => {
       // We're using no-cors mode to avoid CORS issues
       // This means we won't be able to read the response body,
       // but we can still check if the server is reachable.
-      await fetch(url, { mode: 'no-cors' });
+      await fetch(url, {
+        mode: 'no-cors',
+        signal: AbortSignal.timeout(5000)
+      });
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
