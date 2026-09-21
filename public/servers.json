@@ -415,12 +415,6 @@
             "type": "Mixed"
         },
         {
-            "id": 50,
-            "name": "FOCUSONLINE FTP SERVER",
-            "addresses": [],
-            "type": "Mixed"
-        },
-        {
             "id": 51,
             "name": "BOSSBD FTP SERVER",
             "addresses": [
