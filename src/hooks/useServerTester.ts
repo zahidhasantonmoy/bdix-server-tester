@@ -27,7 +27,15 @@ const useServerTester = (servers: Server[]) => {
       // We're using no-cors mode to avoid CORS issues
       // This means we won't be able to read the response body,
       // but we can still check if the server is reachable.
-      await fetch(url, { mode: 'no-cors' });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      try {
+        await fetch(url, { mode: 'no-cors', signal: controller.signal });
+      } finally {
+        clearTimeout(timeoutId);
+      }
+
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
@@ -41,7 +49,11 @@ const useServerTester = (servers: Server[]) => {
       const responseTime = endTime - startTime;
       let errorMessage = 'An unknown error occurred';
       if (error instanceof Error) {
-        errorMessage = error.message;
+        if (error.name === 'AbortError') {
+          errorMessage = 'Request timed out after 5000ms';
+        } else {
+          errorMessage = error.message;
+        }
       }
       return {
         id: server.id,
