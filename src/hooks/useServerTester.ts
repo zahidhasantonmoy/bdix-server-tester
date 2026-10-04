@@ -20,6 +20,15 @@ const useServerTester = (servers: Server[]) => {
   const [isTesting, setIsTesting] = useState(false);
 
   const testServer = useCallback(async (server: Server): Promise<TestResult> => {
+    if (!server.addresses || server.addresses.length === 0) {
+      return {
+        id: server.id,
+        status: 'offline',
+        responseTime: 0,
+        error: 'No address provided',
+      };
+    }
+
     // For now, we'll test the first address in the addresses array
     const url = server.addresses[0];
     const startTime = Date.now();
@@ -27,7 +36,12 @@ const useServerTester = (servers: Server[]) => {
       // We're using no-cors mode to avoid CORS issues
       // This means we won't be able to read the response body,
       // but we can still check if the server is reachable.
-      await fetch(url, { mode: 'no-cors' });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      await fetch(url, { mode: 'no-cors', signal: controller.signal });
+      clearTimeout(timeoutId);
+
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
