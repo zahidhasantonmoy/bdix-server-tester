@@ -20,14 +20,31 @@ const useServerTester = (servers: Server[]) => {
   const [isTesting, setIsTesting] = useState(false);
 
   const testServer = useCallback(async (server: Server): Promise<TestResult> => {
+    const startTime = Date.now();
+
+    if (!server.addresses || server.addresses.length === 0) {
+      return {
+        id: server.id,
+        status: 'offline',
+        responseTime: 0,
+        error: 'No addresses found for server',
+      };
+    }
+
     // For now, we'll test the first address in the addresses array
     const url = server.addresses[0];
-    const startTime = Date.now();
+
+    // Add a 5-second timeout using AbortController
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
     try {
       // We're using no-cors mode to avoid CORS issues
       // This means we won't be able to read the response body,
       // but we can still check if the server is reachable.
-      await fetch(url, { mode: 'no-cors' });
+      await fetch(url, { mode: 'no-cors', signal: controller.signal });
+      clearTimeout(timeoutId);
+
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
@@ -37,12 +54,19 @@ const useServerTester = (servers: Server[]) => {
         responseTime: responseTime,
       };
     } catch (error: unknown) {
+      clearTimeout(timeoutId);
       const endTime = Date.now();
       const responseTime = endTime - startTime;
       let errorMessage = 'An unknown error occurred';
+
       if (error instanceof Error) {
-        errorMessage = error.message;
+        if (error.name === 'AbortError') {
+          errorMessage = 'Request timed out after 5 seconds';
+        } else {
+          errorMessage = error.message;
+        }
       }
+
       return {
         id: server.id,
         status: 'offline',
