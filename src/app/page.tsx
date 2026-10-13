@@ -25,10 +25,26 @@ export default function Home() {
   const filteredServers = useMemo(() => {
     return servers.filter((server) => {
       const matchesSearch = server.name.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory = selectedCategory === "All" || server.type === selectedCategory;
+      let matchesCategory = false;
+
+      if (selectedCategory === "All") {
+        matchesCategory = true;
+      } else if (selectedCategory === "Online") {
+        const result = testResults.find((r) => r.id === server.id);
+        matchesCategory = result?.status === 'online';
+      } else if (selectedCategory === "Offline") {
+        const result = testResults.find((r) => r.id === server.id);
+        matchesCategory = result?.status === 'offline';
+      } else if (selectedCategory === "Testing") {
+        const result = testResults.find((r) => r.id === server.id);
+        matchesCategory = result?.status === 'testing';
+      } else {
+        matchesCategory = server.type === selectedCategory;
+      }
+
       return matchesSearch && matchesCategory;
     });
-  }, [servers, search, selectedCategory]);
+  }, [servers, search, selectedCategory, testResults]);
 
   const handleStartTest = () => {
     startTesting(5); // Default concurrency limit
