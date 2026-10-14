@@ -31,22 +31,26 @@ const useServerTester = (servers: Server[]) => {
       };
     }
 
-    // For now, we'll test the first address in the addresses array
-    const url = server.addresses[0];
-
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      // Test all addresses concurrently and use the first one that responds successfully
+      await Promise.any(
+        server.addresses.map(async (url) => {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      // We're using no-cors mode to avoid CORS issues
-      // This means we won't be able to read the response body,
-      // but we can still check if the server is reachable.
-      await fetch(url, {
-        mode: 'no-cors',
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
+          try {
+            // We're using no-cors mode to avoid CORS issues
+            // This means we won't be able to read the response body,
+            // but we can still check if the server is reachable.
+            await fetch(url, {
+              mode: 'no-cors',
+              signal: controller.signal
+            });
+          } finally {
+            clearTimeout(timeoutId);
+          }
+        })
+      );
 
       const endTime = Date.now();
       const responseTime = endTime - startTime;
