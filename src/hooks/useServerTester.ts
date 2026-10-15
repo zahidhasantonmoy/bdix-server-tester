@@ -31,22 +31,29 @@ const useServerTester = (servers: Server[]) => {
       };
     }
 
-    // For now, we'll test the first address in the addresses array
-    const url = server.addresses[0];
-
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      // Test all addresses concurrently and resolve with the first successful one
+      const fetchPromises = server.addresses.map(async (url) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      // We're using no-cors mode to avoid CORS issues
-      // This means we won't be able to read the response body,
-      // but we can still check if the server is reachable.
-      await fetch(url, {
-        mode: 'no-cors',
-        signal: controller.signal
+        try {
+          // We're using no-cors mode to avoid CORS issues
+          // This means we won't be able to read the response body,
+          // but we can still check if the server is reachable.
+          await fetch(url, {
+            mode: 'no-cors',
+            signal: controller.signal
+          });
+          clearTimeout(timeoutId);
+          return url; // Resolve with the URL if successful
+        } catch (error) {
+          clearTimeout(timeoutId);
+          throw error; // Rethrow to let Promise.any handle it
+        }
       });
 
-      clearTimeout(timeoutId);
+      await Promise.any(fetchPromises);
 
       const endTime = Date.now();
       const responseTime = endTime - startTime;
@@ -57,9 +64,10 @@ const useServerTester = (servers: Server[]) => {
         responseTime: responseTime,
       };
     } catch (error: unknown) {
+      // Promise.any throws an AggregateError if all promises reject
       const endTime = Date.now();
       const responseTime = endTime - startTime;
-      let errorMessage = 'An unknown error occurred';
+      let errorMessage = 'All addresses failed to respond';
       if (error instanceof Error) {
         errorMessage = error.message;
       }
