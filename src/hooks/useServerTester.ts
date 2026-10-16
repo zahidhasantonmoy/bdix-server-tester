@@ -31,22 +31,27 @@ const useServerTester = (servers: Server[]) => {
       };
     }
 
-    // For now, we'll test the first address in the addresses array
-    const url = server.addresses[0];
-
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      // Test all addresses concurrently using Promise.any
+      const addressPromises = server.addresses.map(async (url) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-      // We're using no-cors mode to avoid CORS issues
-      // This means we won't be able to read the response body,
-      // but we can still check if the server is reachable.
-      await fetch(url, {
-        mode: 'no-cors',
-        signal: controller.signal
+        try {
+          // We're using no-cors mode to avoid CORS issues
+          // This means we won't be able to read the response body,
+          // but we can still check if the server is reachable.
+          await fetch(url, {
+            mode: 'no-cors',
+            signal: controller.signal
+          });
+          return url; // Resolve with the successful URL
+        } finally {
+          clearTimeout(timeoutId);
+        }
       });
 
-      clearTimeout(timeoutId);
+      await Promise.any(addressPromises);
 
       const endTime = Date.now();
       const responseTime = endTime - startTime;
@@ -57,12 +62,17 @@ const useServerTester = (servers: Server[]) => {
         responseTime: responseTime,
       };
     } catch (error: unknown) {
+      // Promise.any rejects with an AggregateError if ALL promises reject
       const endTime = Date.now();
       const responseTime = endTime - startTime;
-      let errorMessage = 'An unknown error occurred';
-      if (error instanceof Error) {
+      let errorMessage = 'All addresses failed to respond';
+      if (error instanceof AggregateError) {
+        // We could aggregate messages, but a general message is usually enough for "offline"
+        errorMessage = 'All addresses are offline or timed out';
+      } else if (error instanceof Error) {
         errorMessage = error.message;
       }
+
       return {
         id: server.id,
         status: 'offline',
