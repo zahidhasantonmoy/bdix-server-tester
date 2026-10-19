@@ -23,12 +23,25 @@ export default function Home() {
   const { testResults, isTesting, startTesting } = useServerTester(servers);
 
   const filteredServers = useMemo(() => {
+    // Precompute a map for O(1) lookups
+    const testResultsMap = new Map(testResults.map(r => [r.id, r]));
+
     return servers.filter((server) => {
       const matchesSearch = server.name.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory = selectedCategory === "All" || server.type === selectedCategory;
+
+      let matchesCategory = false;
+      if (selectedCategory === "All") {
+        matchesCategory = true;
+      } else {
+        const result = testResultsMap.get(server.id);
+        const status = result?.status || "testing"; // default to testing if not found
+
+        matchesCategory = status === selectedCategory.toLowerCase();
+      }
+
       return matchesSearch && matchesCategory;
     });
-  }, [servers, search, selectedCategory]);
+  }, [servers, search, selectedCategory, testResults]);
 
   const handleStartTest = () => {
     startTesting(5); // Default concurrency limit
