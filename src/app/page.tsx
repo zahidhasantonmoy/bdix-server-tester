@@ -12,7 +12,7 @@ interface Server {
 export default function Home() {
   const [servers, setServers] = useState<Server[]>([]);
   const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [statusFilter, setStatusFilter] = useState<string>("All");
 
   useEffect(() => {
     fetch("/servers.json")
@@ -25,10 +25,20 @@ export default function Home() {
   const filteredServers = useMemo(() => {
     return servers.filter((server) => {
       const matchesSearch = server.name.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory = selectedCategory === "All" || server.type === selectedCategory;
-      return matchesSearch && matchesCategory;
+
+      let matchesStatus = true;
+      if (statusFilter !== "All") {
+        const result = testResults.find(r => r.id === server.id);
+        const status = result?.status || "testing"; // default if not found
+
+        if (statusFilter === "Online" && status !== "online") matchesStatus = false;
+        if (statusFilter === "Offline" && status !== "offline") matchesStatus = false;
+        if (statusFilter === "Testing" && status !== "testing") matchesStatus = false;
+      }
+
+      return matchesSearch && matchesStatus;
     });
-  }, [servers, search, selectedCategory]);
+  }, [servers, search, statusFilter, testResults]);
 
   const handleStartTest = () => {
     startTesting(5); // Default concurrency limit
@@ -71,10 +81,10 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
               <div className="flex-grow flex flex-wrap gap-2">
-                <button className="px-3 py-1 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700" onClick={() => setSelectedCategory("All")}>Show all <strong>{servers.length}</strong></button>
-                <button className="px-3 py-1 text-sm rounded-md bg-green-500 text-white hover:bg-green-600" onClick={() => setSelectedCategory("Online")}>Open <strong>{testResults.filter(r => r.status === 'online').length}</strong></button>
-                <button className="px-3 py-1 text-sm rounded-md bg-red-500 text-white hover:bg-red-600" onClick={() => setSelectedCategory("Offline")}>Closed <strong>{testResults.filter(r => r.status === 'offline').length}</strong></button>
-                <button className="px-3 py-1 text-sm rounded-md bg-yellow-500 text-white hover:bg-yellow-600" onClick={() => setSelectedCategory("Testing")}>Testing <strong>{testResults.filter(r => r.status === 'testing').length}</strong></button>
+                <button className={`px-3 py-1 text-sm rounded-md text-white transition-colors duration-200 ${statusFilter === "All" ? "bg-blue-800" : "bg-blue-600 hover:bg-blue-700"}`} onClick={() => setStatusFilter("All")}>Show all <strong>{servers.length}</strong></button>
+                <button className={`px-3 py-1 text-sm rounded-md text-white transition-colors duration-200 ${statusFilter === "Online" ? "bg-green-700" : "bg-green-500 hover:bg-green-600"}`} onClick={() => setStatusFilter("Online")}>Open <strong>{testResults.filter(r => r.status === 'online').length}</strong></button>
+                <button className={`px-3 py-1 text-sm rounded-md text-white transition-colors duration-200 ${statusFilter === "Offline" ? "bg-red-700" : "bg-red-500 hover:bg-red-600"}`} onClick={() => setStatusFilter("Offline")}>Closed <strong>{testResults.filter(r => r.status === 'offline').length}</strong></button>
+                <button className={`px-3 py-1 text-sm rounded-md text-white transition-colors duration-200 ${statusFilter === "Testing" ? "bg-yellow-700" : "bg-yellow-500 hover:bg-yellow-600"}`} onClick={() => setStatusFilter("Testing")}>Testing <strong>{testResults.filter(r => r.status === 'testing').length}</strong></button>
               </div>
               <div className="w-full sm:w-1/4 mt-4 sm:mt-0">
                 <input
