@@ -1,8 +1,35 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# BDIX Server Status Checker
+
+A web application designed to help users quickly find and check the status of available BDIX (Bangladesh Internet Exchange) servers. It provides real-time testing of various FTP, movie, and live TV servers connected through the BDIX network to determine which ones are currently online and reachable from your ISP.
+
+## Features
+
+- **Real-time Server Testing:** Concurrently tests multiple BDIX servers to determine their availability.
+- **Categorization:** Filters servers by categories like Movie, FTP, etc.
+- **Search Functionality:** Easily search for specific server names.
+- **Status Indicators:** Clearly displays whether a server is Open (Online), Closed (Offline), or currently being Tested.
+- **Modern UI:** Clean, responsive, and user-friendly interface built with Tailwind CSS.
+- **Concurrency Control:** Efficiently tests servers with a concurrency limit to avoid network congestion.
+
+## Tech Stack
+
+- **Framework:** [Next.js](https://nextjs.org) (App Router)
+- **Library:** [React](https://react.dev)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com)
 
 ## Getting Started
 
-First, run the development server:
+First, make sure you have Node.js installed on your machine. Then, clone the repository and install the dependencies:
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+Run the development server:
 
 ```bash
 npm run dev
@@ -10,27 +37,24 @@ npm run dev
 yarn dev
 # or
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Configuration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Server configurations and data are maintained locally in the `public/servers.json` file. You can add, remove, or modify BDIX server entries in this file to update the list of tested servers.
 
-## Learn More
+## Build and Deploy
 
-To learn more about Next.js, take a look at the following resources:
+To build the project for production, run:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The easiest way to deploy this Next.js app is to use the [Vercel Platform](https://vercel.com/new).
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is open-source.
