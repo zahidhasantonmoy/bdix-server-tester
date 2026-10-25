@@ -13,11 +13,19 @@ export default function Home() {
   const [servers, setServers] = useState<Server[]>([]);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetch("/servers.json")
       .then((res) => res.json())
-      .then((data) => setServers(data.servers));
+      .then((data) => {
+        setServers(data.servers);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load servers", err);
+        setIsLoading(false);
+      });
   }, []);
 
   const { testResults, isTesting, startTesting } = useServerTester(servers);
@@ -25,10 +33,20 @@ export default function Home() {
   const filteredServers = useMemo(() => {
     return servers.filter((server) => {
       const matchesSearch = server.name.toLowerCase().includes(search.toLowerCase());
-      const matchesCategory = selectedCategory === "All" || server.type === selectedCategory;
+      const result = testResults.find((r) => r.id === server.id);
+
+      let matchesCategory = false;
+      if (selectedCategory === "All") {
+        matchesCategory = true;
+      } else if (["Online", "Offline", "Testing"].includes(selectedCategory)) {
+        matchesCategory = result?.status === selectedCategory.toLowerCase();
+      } else {
+        matchesCategory = server.type === selectedCategory;
+      }
+
       return matchesSearch && matchesCategory;
     });
-  }, [servers, search, selectedCategory]);
+  }, [servers, search, selectedCategory, testResults]);
 
   const handleStartTest = () => {
     startTesting(5); // Default concurrency limit
@@ -62,7 +80,7 @@ export default function Home() {
               </div>
               <button
                 onClick={handleStartTest}
-                disabled={isTesting}
+                disabled={isTesting || isLoading}
                 className="px-6 py-3 rounded-md bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isTesting ? "Testing..." : "Test server again"}
@@ -71,16 +89,17 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
               <div className="flex-grow flex flex-wrap gap-2">
-                <button className="px-3 py-1 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700" onClick={() => setSelectedCategory("All")}>Show all <strong>{servers.length}</strong></button>
-                <button className="px-3 py-1 text-sm rounded-md bg-green-500 text-white hover:bg-green-600" onClick={() => setSelectedCategory("Online")}>Open <strong>{testResults.filter(r => r.status === 'online').length}</strong></button>
-                <button className="px-3 py-1 text-sm rounded-md bg-red-500 text-white hover:bg-red-600" onClick={() => setSelectedCategory("Offline")}>Closed <strong>{testResults.filter(r => r.status === 'offline').length}</strong></button>
-                <button className="px-3 py-1 text-sm rounded-md bg-yellow-500 text-white hover:bg-yellow-600" onClick={() => setSelectedCategory("Testing")}>Testing <strong>{testResults.filter(r => r.status === 'testing').length}</strong></button>
+                <button disabled={isLoading} className="px-3 py-1 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" onClick={() => setSelectedCategory("All")}>Show all <strong>{servers.length}</strong></button>
+                <button disabled={isLoading} className="px-3 py-1 text-sm rounded-md bg-green-500 text-white hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed" onClick={() => setSelectedCategory("Online")}>Open <strong>{testResults.filter(r => r.status === 'online').length}</strong></button>
+                <button disabled={isLoading} className="px-3 py-1 text-sm rounded-md bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed" onClick={() => setSelectedCategory("Offline")}>Closed <strong>{testResults.filter(r => r.status === 'offline').length}</strong></button>
+                <button disabled={isLoading} className="px-3 py-1 text-sm rounded-md bg-yellow-500 text-white hover:bg-yellow-600 disabled:opacity-50 disabled:cursor-not-allowed" onClick={() => setSelectedCategory("Testing")}>Testing <strong>{testResults.filter(r => r.status === 'testing').length}</strong></button>
               </div>
               <div className="w-full sm:w-1/4 mt-4 sm:mt-0">
                 <input
                   type="text"
                   placeholder="Search..."
-                  className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  disabled={isLoading}
+                  className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
@@ -98,49 +117,67 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody>
-                {filteredServers.map((server) => {
-                  const result = testResults.find((r) => r.id === server.id);
-                  const statusColorClass =
-                    result?.status === "online"
-                      ? "text-green-500"
-                      : result?.status === "offline"
-                      ? "text-red-500"
-                      : "text-yellow-500";
-                  const statusText =
-                    result?.status === "online"
-                      ? "Open"
-                      : result?.status === "offline"
-                      ? "Closed"
-                      : "Testing";
-
-                  return (
-                    <tr key={server.id} className="border-b border-gray-200 hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm text-gray-800">{server.name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-800 hidden sm:table-cell">
-                        <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">{server.type}</span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-800 hidden sm:table-cell">
-                        {new Date().toLocaleTimeString()}
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-800">
-                        <span className={`flex items-center ${statusColorClass}`}>
-                          <span className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: statusColorClass === 'text-green-500' ? '#48c78e' : statusColorClass === 'text-red-500' ? '#f14668' : '#ffe08a' }}></span>
-                          {statusText}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm">
-                        <a
-                          href={server.addresses[0]}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline"
-                        >
-                          Visit
-                        </a>
-                      </td>
+                {isLoading ? (
+                  [...Array(5)].map((_, i) => (
+                    <tr key={i} className="border-b border-gray-200 animate-pulse">
+                      <td className="px-4 py-3"><div className="h-4 bg-gray-200 rounded w-3/4"></div></td>
+                      <td className="px-4 py-3 hidden sm:table-cell"><div className="h-4 bg-gray-200 rounded w-1/2"></div></td>
+                      <td className="px-4 py-3 hidden sm:table-cell"><div className="h-4 bg-gray-200 rounded w-1/2"></div></td>
+                      <td className="px-4 py-3"><div className="h-4 bg-gray-200 rounded w-1/2"></div></td>
+                      <td className="px-4 py-3"><div className="h-4 bg-gray-200 rounded w-1/4"></div></td>
                     </tr>
-                  );
-                })}
+                  ))
+                ) : filteredServers.length > 0 ? (
+                  filteredServers.map((server) => {
+                    const result = testResults.find((r) => r.id === server.id);
+                    const statusColorClass =
+                      result?.status === "online"
+                        ? "text-green-500"
+                        : result?.status === "offline"
+                        ? "text-red-500"
+                        : "text-yellow-500";
+                    const statusText =
+                      result?.status === "online"
+                        ? "Open"
+                        : result?.status === "offline"
+                        ? "Closed"
+                        : "Testing";
+
+                    return (
+                      <tr key={server.id} className="border-b border-gray-200 hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm text-gray-800">{server.name}</td>
+                        <td className="px-4 py-3 text-sm text-gray-800 hidden sm:table-cell">
+                          <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">{server.type}</span>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-800 hidden sm:table-cell">
+                          {new Date().toLocaleTimeString()}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-800">
+                          <span className={`flex items-center ${statusColorClass}`}>
+                            <span className="w-3 h-3 rounded-full mr-2" style={{ backgroundColor: statusColorClass === 'text-green-500' ? '#48c78e' : statusColorClass === 'text-red-500' ? '#f14668' : '#ffe08a' }}></span>
+                            {statusText}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm">
+                          <a
+                            href={server.addresses[0]}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                          >
+                            Visit
+                          </a>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                      No servers found matching your criteria.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
