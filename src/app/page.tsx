@@ -111,7 +111,7 @@ export default function Home() {
                 <tr>
                   <th className="px-4 py-2 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Site Name</th>
                   <th className="px-4 py-2 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">Site Type</th>
-                  <th className="px-4 py-2 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">Last Checked</th>
+                  <th className="px-4 py-2 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider hidden sm:table-cell">Latency</th>
                   <th className="px-4 py-2 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
                   <th className="px-4 py-2 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Action</th>
                 </tr>
@@ -150,7 +150,7 @@ export default function Home() {
                           <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">{server.type}</span>
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-800 hidden sm:table-cell">
-                          {new Date().toLocaleTimeString()}
+                          {result?.status === 'online' && result?.responseTime !== undefined ? `${result.responseTime} ms` : '-'}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-800">
                           <span className={`flex items-center ${statusColorClass}`}>
