@@ -32,9 +32,13 @@ const useServerTester = (servers: Server[]) => {
     }
 
     try {
+      const sharedController = new AbortController();
       const testPromises = server.addresses.map(async (url) => {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        const onSharedAbort = () => controller.abort();
+        sharedController.signal.addEventListener('abort', onSharedAbort);
 
         try {
           // We're using no-cors mode to avoid CORS issues
@@ -49,10 +53,20 @@ const useServerTester = (servers: Server[]) => {
         } catch (err) {
           clearTimeout(timeoutId);
           throw err;
+        } finally {
+          sharedController.signal.removeEventListener('abort', onSharedAbort);
         }
       });
 
-      await Promise.any(testPromises);
+      try {
+        await Promise.any(testPromises);
+        // Abort the remaining pending requests since we found a working one
+        sharedController.abort();
+      } catch (error) {
+        // If all promises reject, Promise.any throws an AggregateError.
+        // We catch it here so it propagates to the outer catch block.
+        throw error;
+      }
 
       const endTime = Date.now();
       const responseTime = endTime - startTime;
