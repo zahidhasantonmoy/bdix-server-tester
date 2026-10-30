@@ -13,6 +13,7 @@ interface TestResult {
   status: 'testing' | 'online' | 'offline';
   responseTime?: number; // in ms
   error?: string;
+  workingAddress?: string;
 }
 
 const useServerTester = (servers: Server[]) => {
@@ -52,7 +53,7 @@ const useServerTester = (servers: Server[]) => {
         }
       });
 
-      await Promise.any(testPromises);
+      const workingUrl = await Promise.any(testPromises);
 
       const endTime = Date.now();
       const responseTime = endTime - startTime;
@@ -61,6 +62,7 @@ const useServerTester = (servers: Server[]) => {
         id: server.id,
         status: 'online',
         responseTime: responseTime,
+        workingAddress: workingUrl,
       };
     } catch (error: unknown) {
       const endTime = Date.now();

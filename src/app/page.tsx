@@ -160,7 +160,7 @@ export default function Home() {
                         </td>
                         <td className="px-4 py-3 text-sm">
                           <a
-                            href={server.addresses[0]}
+                            href={result?.workingAddress || server.addresses[0]}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 hover:underline"
