@@ -15,20 +15,35 @@ interface TestResult {
   error?: string;
 }
 
+interface CacheEntry {
+  result: TestResult;
+  timestamp: number;
+}
+
+const resultCache = new Map<number, CacheEntry>();
+const CACHE_DURATION = 300000; // 5 minutes in milliseconds
+
 const useServerTester = (servers: Server[]) => {
   const [testResults, setTestResults] = useState<TestResult[]>([]);
   const [isTesting, setIsTesting] = useState(false);
 
   const testServer = useCallback(async (server: Server): Promise<TestResult> => {
+    const cached = resultCache.get(server.id);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      return cached.result;
+    }
+
     const startTime = Date.now();
 
     if (!server.addresses || server.addresses.length === 0) {
-      return {
+      const result: TestResult = {
         id: server.id,
         status: 'offline',
         responseTime: 0,
         error: 'No addresses available for this server',
       };
+      resultCache.set(server.id, { result, timestamp: Date.now() });
+      return result;
     }
 
     try {
@@ -57,11 +72,13 @@ const useServerTester = (servers: Server[]) => {
       const endTime = Date.now();
       const responseTime = endTime - startTime;
 
-      return {
+      const result: TestResult = {
         id: server.id,
         status: 'online',
         responseTime: responseTime,
       };
+      resultCache.set(server.id, { result, timestamp: Date.now() });
+      return result;
     } catch (error: unknown) {
       const endTime = Date.now();
       const responseTime = endTime - startTime;
@@ -69,12 +86,14 @@ const useServerTester = (servers: Server[]) => {
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      return {
+      const result: TestResult = {
         id: server.id,
         status: 'offline',
         responseTime: responseTime,
         error: errorMessage,
       };
+      resultCache.set(server.id, { result, timestamp: Date.now() });
+      return result;
     }
   }, []);
 
