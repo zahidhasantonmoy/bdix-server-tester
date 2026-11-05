@@ -102,6 +102,12 @@ export default function Home() {
                   className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Escape") {
+                      setSearch("");
+                    }
+                  }}
+                  aria-label="Search servers"
                 />
               </div>
             </div>
