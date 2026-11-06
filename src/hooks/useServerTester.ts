@@ -66,9 +66,13 @@ const useServerTester = (servers: Server[]) => {
       const endTime = Date.now();
       const responseTime = endTime - startTime;
       let errorMessage = 'An unknown error occurred';
-      if (error instanceof Error) {
+
+      if (error instanceof AggregateError) {
+        errorMessage = 'All server addresses are unreachable or timed out';
+      } else if (error instanceof Error) {
         errorMessage = error.message;
       }
+
       return {
         id: server.id,
         status: 'offline',
